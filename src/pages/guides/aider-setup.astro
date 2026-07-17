@@ -1,0 +1,179 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base
+  title="How to install Aider, step by step (2026)"
+  description="A complete beginner-friendly guide to installing Aider, the open-source AI pair programmer that works in your terminal. Includes Python setup, API keys, DeepSeek and Claude configuration, and your first edit."
+  canonical="https://stackverdict.dev/guides/aider-setup"
+>
+  <article class="wrap prose section-top">
+    <nav class="breadcrumb"><a href="/">Home</a> / <a href="/guides/aider-setup">Guides</a> / Install Aider</nav>
+
+    <h1>How to install Aider, step by step</h1>
+    <p class="lede">
+      Aider is a free, open-source AI pair programmer that lives in your terminal and edits files
+      directly in your git repo. Every change becomes a commit, so nothing the AI does is lost or
+      hidden. This guide takes you from zero to your first AI-assisted edit in about ten minutes.
+    </p>
+
+    <div class="callout">
+      <strong>What you'll end up with:</strong> Aider running in your terminal, connected to a
+      model (DeepSeek for near-free costs, or Claude for top quality), editing a real project.
+    </div>
+
+    <h2>Before you start</h2>
+    <p>You need three things. Don't worry if you're missing some — we cover each below.</p>
+    <ul>
+      <li><strong>A terminal.</strong> Terminal on macOS/Linux, or PowerShell on Windows.</li>
+      <li><strong>Python 3.8 or newer.</strong> Check with <code>python --version</code>.</li>
+      <li><strong>A git repository.</strong> Aider works on top of git. Any project folder that's a git repo works.</li>
+    </ul>
+
+    <h2>Step 1 — Check that Python is installed</h2>
+    <div class="step">
+      <p>Open your terminal and run:</p>
+      <pre><code>python --version</code></pre>
+      <p>
+        If you see something like <code>Python 3.11.4</code>, you're set. If you get an error or a
+        version below 3.8, install a current Python from <code>python.org</code> (Windows/macOS) or
+        your package manager (<code>brew install python</code> on macOS, <code>sudo apt install python3</code>
+        on Ubuntu). On some systems the command is <code>python3</code> instead of <code>python</code>.
+      </p>
+    </div>
+
+    <h2>Step 2 — Install Aider</h2>
+    <p>
+      The maintainers recommend a dedicated installer that keeps Aider isolated from your other
+      Python packages, so it can't break them. Run:
+    </p>
+    <div class="step">
+      <pre><code>python -m pip install aider-install
+aider-install</code></pre>
+      <p>
+        This installs Aider in its own environment and adds the <code>aider</code> command to your
+        path. When it finishes, confirm it worked:
+      </p>
+      <pre><code>aider --version</code></pre>
+      <p>You should see a version number print out.</p>
+    </div>
+
+    <div class="callout">
+      <strong>If <code>aider</code> isn't found</strong> after installing, close and reopen your
+      terminal so it picks up the updated path. On Windows, use a fresh PowerShell window.
+    </div>
+
+    <h2>Step 3 — Choose a model and get an API key</h2>
+    <p>
+      Aider needs a model to think with. You bring your own API key, which is why Aider itself is
+      free — you pay only the model provider, and only for what you use. Two popular choices:
+    </p>
+
+    <h3>Option A — DeepSeek (cheapest)</h3>
+    <p>
+      DeepSeek's coding models are strong and extremely cheap, often a few dollars a month for
+      regular use. Create an account at DeepSeek's platform, add a small amount of credit, and
+      generate an API key from their dashboard.
+    </p>
+
+    <h3>Option B — Claude (highest quality)</h3>
+    <p>
+      Anthropic's Claude models lead on complex, multi-file work. Costs are higher than DeepSeek but
+      you pay per use. Create a key in the Anthropic console.
+    </p>
+
+    <div class="callout">
+      <strong>Keep your key secret.</strong> An API key is like a password that can spend your
+      money. Never paste it into a website, commit it to git, or share it in a screenshot.
+    </div>
+
+    <h2>Step 4 — Give Aider your key</h2>
+    <p>
+      Set your key as an environment variable so Aider can read it. Replace
+      <code>your-key-here</code> with your actual key.
+    </p>
+
+    <h3>DeepSeek</h3>
+    <div class="step">
+      <p>macOS / Linux:</p>
+      <pre><code>export DEEPSEEK_API_KEY=your-key-here</code></pre>
+      <p>Windows PowerShell:</p>
+      <pre><code>$env:DEEPSEEK_API_KEY="your-key-here"</code></pre>
+    </div>
+
+    <h3>Claude (Anthropic)</h3>
+    <div class="step">
+      <p>macOS / Linux:</p>
+      <pre><code>export ANTHROPIC_API_KEY=your-key-here</code></pre>
+      <p>Windows PowerShell:</p>
+      <pre><code>$env:ANTHROPIC_API_KEY="your-key-here"</code></pre>
+    </div>
+
+    <p>
+      This sets the key for the current terminal session only. To make it permanent, add the
+      <code>export</code> line to your shell profile (<code>~/.zshrc</code> or <code>~/.bashrc</code>),
+      or store it in an <code>.env</code> file that Aider reads automatically.
+    </p>
+
+    <h2>Step 5 — Start Aider in your project</h2>
+    <div class="step">
+      <p>Move into a project folder that's a git repo. If it isn't one yet:</p>
+      <pre><code>cd my-project
+git init</code></pre>
+      <p>Now launch Aider, telling it which model to use.</p>
+      <p>With DeepSeek:</p>
+      <pre><code>aider --model deepseek</code></pre>
+      <p>With Claude:</p>
+      <pre><code>aider --model sonnet</code></pre>
+      <p>
+        Aider starts a chat prompt right in your terminal. It already sees your repo.
+      </p>
+    </div>
+
+    <h2>Step 6 — Make your first edit</h2>
+    <p>
+      Add the files you want Aider to work on, then just describe the change in plain language.
+    </p>
+    <div class="step">
+      <pre><code>/add index.html
+&gt; Add a dark mode toggle button in the top-right corner</code></pre>
+      <p>
+        Aider proposes the edit, applies it to the file, and commits it to git with a clear message.
+        Because every change is a commit, you can review it with <code>git diff</code> or undo it with
+        <code>git revert</code> if you don't like it.
+      </p>
+    </div>
+
+    <div class="callout">
+      <strong>Handy commands inside Aider:</strong>
+      <code>/add</code> a file to the chat, <code>/drop</code> to remove one,
+      <code>/undo</code> to reverse the last change, <code>/diff</code> to see what changed, and
+      <code>/help</code> for the full list.
+    </div>
+
+    <h2>Common problems</h2>
+    <h3>"Command not found: aider"</h3>
+    <p>Reopen your terminal, or check that the install step finished without errors.</p>
+    <h3>Authentication or 401 errors</h3>
+    <p>
+      Your key isn't set in this terminal session. Re-run the <code>export</code> command, and make
+      sure you copied the whole key with no trailing spaces.
+    </p>
+    <h3>Aider won't edit a file</h3>
+    <p>Add it to the chat first with <code>/add filename</code>. Aider only edits files it's been given.</p>
+
+    <h2>Is Aider right for you?</h2>
+    <p>
+      Aider is a fantastic fit if you're comfortable in a terminal and want maximum control at
+      minimum cost — especially paired with DeepSeek. If you'd rather work in a visual editor or
+      skip the setup entirely, other tools may suit you better.
+    </p>
+
+    <div class="guide-cta">
+      <h3 style="margin-top:0">Not sure Aider is your best match?</h3>
+      <p>Answer three quick questions and compare it against every other AI coding stack for your specific build.</p>
+      <a class="btn btn-primary" href="/#find">Compare stacks &rarr;</a>
+    </div>
+  </article>
+
+  <style>.section-top { padding-top: 48px; }</style>
+</Base>

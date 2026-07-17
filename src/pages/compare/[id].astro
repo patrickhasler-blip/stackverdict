@@ -1,0 +1,65 @@
+---
+import Base from '../../layouts/Base.astro';
+import { COMBOS, TASKS } from '../../data/combos.js';
+
+export function getStaticPaths() {
+  return COMBOS.map((c) => ({ params: { id: c.id }, props: { combo: c } }));
+}
+
+const { combo } = Astro.props;
+const taskLabels = combo.tasks.map((t) => TASKS.find((x) => x.id === t)?.label).filter(Boolean);
+const cost = combo.monthlyLow === 0 && combo.monthlyHigh === 0
+  ? 'Free'
+  : combo.monthlyLow === combo.monthlyHigh
+    ? `$${combo.monthlyLow}/mo`
+    : `$${combo.monthlyLow}–${combo.monthlyHigh}/mo`;
+const pricingLabel = { free: 'Free', byok: 'Bring your own API key', subscription: 'Subscription', usage: 'Pay per use' }[combo.pricing];
+const setupLabel = ['', 'one click', 'quick', 'moderate', 'involved', 'advanced'][combo.setup];
+---
+<Base
+  title={`${combo.tool} with ${combo.model} — review, pricing & setup`}
+  description={`Is ${combo.tool} running ${combo.model} right for your build? Pricing (${cost}), skill level, setup effort, and the tasks it's best at.`}
+  canonical={`https://stackverdict.dev/compare/${combo.id}`}
+>
+  <article class="wrap prose section-top">
+    <nav class="breadcrumb"><a href="/">Home</a> / <a href="/#find">Compare</a> / {combo.tool}</nav>
+    <h1>{combo.tool} <span style="color:var(--slate);font-weight:400">+ {combo.model}</span></h1>
+    <p class="lede">A {combo.surface}-based tool served by {combo.provider}. Here's who it fits, what it costs, and how to get going.</p>
+
+    <div class="spec">
+      <div><span>Price</span><strong>{cost}</strong><em>{pricingLabel}</em></div>
+      <div><span>Skill floor</span><strong>{combo.minSkill}</strong><em>and up</em></div>
+      <div><span>Setup</span><strong>{setupLabel}</strong><em>to get running</em></div>
+      <div><span>Works in</span><strong>{combo.surface}</strong><em>&nbsp;</em></div>
+    </div>
+
+    <h2>Best for</h2>
+    <ul>{taskLabels.map((l) => <li>{l}</li>)}</ul>
+
+    <h2>Strengths</h2>
+    <ul>{combo.pros.map((p) => <li>{p}</li>)}</ul>
+
+    <h2>Trade-offs</h2>
+    <ul>{combo.cons.map((c) => <li>{c}</li>)}</ul>
+
+    <div class="guide-cta">
+      <h3 style="margin-top:0">{combo.guide ? 'Ready to set it up?' : `Go to ${combo.tool}`}</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+        {combo.guide && <a class="btn btn-primary" href={`/guides/${combo.guide}`}>Setup guide &rarr;</a>}
+        <a class="btn btn-ghost" href={combo.link} target="_blank" rel="noopener">Official site &rarr;</a>
+        <a class="btn btn-ghost" href="/#find">Compare alternatives</a>
+      </div>
+    </div>
+  </article>
+
+  <style>
+    .section-top { padding-top: 48px; }
+    .spec { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 2px solid var(--ink); border-radius: var(--radius); overflow: hidden; margin: 28px 0; background: #fff; }
+    .spec > div { padding: 16px; border-right: 1px solid var(--line); }
+    .spec > div:last-child { border-right: 0; }
+    .spec span { font-family: var(--display); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--slate); display: block; }
+    .spec strong { font-family: var(--display); font-size: 20px; display: block; margin: 4px 0 2px; text-transform: capitalize; }
+    .spec em { font-style: normal; font-size: 13px; color: var(--slate); }
+    @media (max-width: 720px) { .spec { grid-template-columns: 1fr 1fr; } .spec > div:nth-child(2) { border-right: 0; } }
+  </style>
+</Base>

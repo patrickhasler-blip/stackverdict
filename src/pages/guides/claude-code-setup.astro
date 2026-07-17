@@ -1,0 +1,72 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base
+  title="How to install Claude Code, step by step (2026)"
+  description="A step-by-step guide to installing Claude Code, Anthropic's agentic command-line coding tool. Covers Node.js requirements, installation, signing in, and running your first task."
+  canonical="https://stackverdict.dev/guides/claude-code-setup"
+>
+  <article class="wrap prose section-top">
+    <nav class="breadcrumb"><a href="/">Home</a> / <a href="/guides/aider-setup">Guides</a> / Install Claude Code</nav>
+    <h1>How to install Claude Code, step by step</h1>
+    <p class="lede">
+      Claude Code is Anthropic's agentic coding tool that runs in your terminal and works across
+      your whole repository — reading files, making edits, running commands, and shipping changes.
+      This guide gets you from install to first task.
+    </p>
+
+    <div class="callout"><strong>Product details move fast.</strong> Node version requirements, install commands, and plans can change. Always confirm against Anthropic's official docs before relying on specifics here.</div>
+
+    <h2>Before you start</h2>
+    <ul>
+      <li><strong>A terminal</strong> and basic comfort running commands.</li>
+      <li><strong>Node.js</strong> installed (Claude Code is distributed via npm). Check with <code>node --version</code>.</li>
+      <li><strong>A Claude account</strong> — a paid plan or API billing, depending on how you sign in.</li>
+    </ul>
+
+    <h2>Step 1 — Confirm Node.js is installed</h2>
+    <div class="step">
+      <pre><code>node --version</code></pre>
+      <p>If you get a version number, you're set. If not, install Node from <code>nodejs.org</code> (the LTS build) or via your package manager.</p>
+    </div>
+
+    <h2>Step 2 — Install Claude Code</h2>
+    <div class="step">
+      <p>Install it globally with npm:</p>
+      <pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
+      <p>Then confirm it's on your path:</p>
+      <pre><code>claude --version</code></pre>
+    </div>
+
+    <h2>Step 3 — Open your project and sign in</h2>
+    <div class="step">
+      <p>Move into a project folder and launch it:</p>
+      <pre><code>cd my-project
+claude</code></pre>
+      <p>The first run walks you through signing in. Follow the prompts to authenticate with your Claude account.</p>
+    </div>
+
+    <h2>Step 4 — Run your first task</h2>
+    <div class="step">
+      <p>Just describe what you want in plain language:</p>
+      <pre><code>&gt; Add input validation to the signup form and write a test for it</code></pre>
+      <p>Claude Code explores the relevant files, proposes changes, and asks before running anything with side effects. Review its plan, approve the steps, and it applies them.</p>
+    </div>
+
+    <div class="callout"><strong>Tip:</strong> Keep changes reviewable. Work on a branch, and let Claude Code make focused commits so you can read each diff before merging.</div>
+
+    <h2>Is Claude Code right for you?</h2>
+    <p>
+      It shines on real repositories and larger refactors, and it's most comfortable if you already
+      live in the terminal. Newer to coding, or prefer a visual app? A desktop or browser tool may
+      suit you better.
+    </p>
+
+    <div class="guide-cta">
+      <h3 style="margin-top:0">Compare Claude Code against the field</h3>
+      <p>See how it stacks up for your exact task, skill level, and budget.</p>
+      <a class="btn btn-primary" href="/#find">Compare stacks &rarr;</a>
+    </div>
+  </article>
+  <style>.section-top { padding-top: 48px; }</style>
+</Base>

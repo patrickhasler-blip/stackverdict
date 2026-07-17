@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+import Wizard from '../components/Wizard.jsx';
+import { COMBOS } from '../data/combos.js';
+const toolCount = new Set(COMBOS.map((c) => c.tool)).size;
+---
+<Base
+  title="Find the right AI coding stack"
+  description="Answer three questions and get a ranked comparison of AI coding tools and models, like a price-comparison site for vibe coding."
+  canonical="https://stackverdict.dev/"
+>
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <p class="eyebrow">The verdict engine for AI coding</p>
+      <h1>The right AI coding<br />stack, judged for you.</h1>
+      <p class="hero-lede">
+        {toolCount} tools, dozens of tool-and-model pairings. Tell us what you're building,
+        how much you code, and what you can spend &mdash; we rank the ones that actually fit.
+      </p>
+      <a class="btn btn-primary btn-lg" href="#find">Find my stack &rarr;</a>
+    </div>
+  </section>
+
+  <section id="find" class="wrap section">
+    <Wizard client:load />
+  </section>
+
+  <section id="how" class="wrap section">
+    <h2 class="section-title">How it works</h2>
+    <ol class="how-grid">
+      <li>
+        <span class="how-n">01</span>
+        <h3>Pick your task</h3>
+        <p>A Shopify app needs different tooling than a data notebook. We match on the job, not the hype.</p>
+      </li>
+      <li>
+        <span class="how-n">02</span>
+        <h3>Set skill &amp; budget</h3>
+        <p>A terminal agent that assumes you know git is wrong for a beginner. We factor in your level and spend.</p>
+      </li>
+      <li>
+        <span class="how-n">03</span>
+        <h3>Compare &amp; set up</h3>
+        <p>Get a ranked shortlist with real trade-offs, then a step-by-step setup guide for the one you choose.</p>
+      </li>
+    </ol>
+  </section>
+
+  <style>
+    .hero { border-bottom: 2px solid var(--ink); background:
+      repeating-linear-gradient(90deg, transparent 0 39px, rgba(20,27,46,.05) 39px 40px),
+      repeating-linear-gradient(0deg, transparent 0 39px, rgba(20,27,46,.05) 39px 40px); }
+    .hero-inner { padding: 72px 24px 64px; }
+    .eyebrow { font-family: var(--display); font-weight: 600; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--verdict-deep); margin: 0 0 16px; }
+    .hero h1 { font-size: clamp(38px, 7vw, 68px); font-weight: 700; margin: 0 0 20px; }
+    .hero-lede { font-size: clamp(17px, 2.4vw, 21px); max-width: 620px; color: var(--ink-soft); margin: 0 0 28px; }
+    .btn-lg { font-size: 17px; padding: 14px 26px; }
+    .section { padding: 64px 24px 0; }
+    .section-title { font-size: clamp(26px, 4vw, 36px); margin: 0 0 28px; }
+    .how-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .how-grid li { border-top: 3px solid var(--ink); padding-top: 16px; }
+    .how-n { font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--verdict-deep); }
+    .how-grid h3 { font-size: 20px; margin: 6px 0 8px; }
+    .how-grid p { font-size: 15px; color: var(--slate); margin: 0; }
+    @media (max-width: 720px) { .how-grid { grid-template-columns: 1fr; } }
+  </style>
+</Base>

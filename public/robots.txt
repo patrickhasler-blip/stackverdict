@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://stackverdict.dev/sitemap-index.xml
