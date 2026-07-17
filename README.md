@@ -1,7 +1,9 @@
-# VibeStack — Check24 for vibe coding
+# StackVerdict — Check24 for solo builders on API access
 
-A comparison engine for AI coding tools. Users pick a task, their skill level, and
-a budget, and get a ranked shortlist of tool + model pairings — plus SEO setup guides.
+A comparison engine for AI coding tools, niched to solopreneurs who build real products
+(Shopify apps, mobile apps, directories, browser extensions, AI agents) and pay for API
+access rather than bundled subscriptions. Users pick what they're building and their
+API budget, and get a ranked shortlist of tool + model pairings — plus SEO setup guides.
 
 ## Run it
 ```bash
@@ -19,7 +21,7 @@ Pages, or connect the repo for auto-deploys. Set the real domain in `astro.confi
 ## Where to edit things
 - `src/data/combos.js`   THE database. Add/edit tool+model pairings and the ranking
                          logic here. This is your moat — keep it current.
-- `src/components/Wizard.jsx`   The 3-step comparison flow (React island).
+- `src/components/Wizard.jsx`   The 2-step comparison flow: what you're building, then API budget (React island).
 - `src/pages/index.astro`       Homepage + hero.
 - `src/pages/guides/*.astro`    SEO setup guides (aider, claude-code, cowork).
 - `src/pages/compare/[id].astro`  Auto-generates one indexable detail page per combo.
@@ -31,7 +33,7 @@ appearance in the wizard are generated automatically. If you write a guide for i
 set its `guide` field to the guide's slug.
 
 ## Next steps to make it real
-1. Verify every price/skill/task field against the tools' current pricing pages.
+1. Verify every price/task field against the tools' current pricing pages.
 2. Add affiliate/referral links in each combo's `link` field where programs exist.
 3. Write more SEO guides (one per tool) — they're your traffic engine.
 4. Add a sitemap.xml (@astrojs/sitemap) and analytics.

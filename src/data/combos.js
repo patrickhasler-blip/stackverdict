@@ -10,6 +10,7 @@
 //   provider      who serves the model
 //   tasks         array of task ids this pairing is good at (see TASKS)
 //   minSkill      "beginner" | "intermediate" | "pro" — floor to be productive
+//                 (shown on compare pages; no longer asked in the wizard)
 //   pricing       "free" | "byok" | "subscription" | "usage"  (byok = bring your own API key)
 //   monthlyLow    typical low end of monthly spend in USD (0 = free)
 //   monthlyHigh   typical high end of monthly spend in USD
@@ -20,28 +21,22 @@
 //   guide         optional slug of an in-site setup guide
 //   link          outbound reference
 
-export const SKILL_LEVELS = [
-  { id: 'beginner', label: 'New to coding', hint: 'You can read code but writing from scratch is hard.' },
-  { id: 'intermediate', label: 'Comfortable', hint: 'You ship features, git is second nature.' },
-  { id: 'pro', label: 'Experienced', hint: 'You architect systems and review AI output critically.' },
+export const TASKS = [
+  { id: 'shopify-app', label: 'Build a Shopify app', blurb: 'Embedded app, Polaris UI, webhooks, billing.' },
+  { id: 'web-app', label: 'SaaS / web app', blurb: 'Full-stack product: auth, billing, a database.' },
+  { id: 'mobile-app', label: 'Mobile app', blurb: 'React Native / Expo, native features, store-ready.' },
+  { id: 'directory', label: 'Directory / marketplace', blurb: 'Listings, search & filters, submissions, maybe payments.' },
+  { id: 'browser-extension', label: 'Browser extension', blurb: 'Manifest V3, content scripts, store review.' },
+  { id: 'ai-agent', label: 'Chatbot / AI agent', blurb: 'Wraps an LLM API into a product — chat UI, tools, memory.' },
+  { id: 'api-backend', label: 'API / backend service', blurb: 'Auth, endpoints, billing — no frontend required.' },
+  { id: 'landing-page', label: 'Landing page', blurb: 'Static, fast, SEO-friendly — the front door for your product.' },
 ];
 
 export const BUDGETS = [
-  { id: 'free', label: 'Free only', cap: 0, hint: 'No spend. Free tiers and local models.' },
-  { id: 'low', label: 'Up to $25/mo', cap: 25, hint: 'One subscription or light API use.' },
-  { id: 'mid', label: 'Up to $75/mo', cap: 75, hint: 'A serious daily driver.' },
-  { id: 'high', label: 'No cap', cap: Infinity, hint: 'Whatever ships fastest.' },
-];
-
-export const TASKS = [
-  { id: 'shopify-app', label: 'Build a Shopify app', blurb: 'Embedded app, Polaris UI, webhooks, billing.' },
-  { id: 'web-app', label: 'Build a web app', blurb: 'Full-stack React/Next, auth, a database.' },
-  { id: 'landing-page', label: 'Landing page / marketing site', blurb: 'Static, fast, SEO-friendly.' },
-  { id: 'automation', label: 'Scripts & automation', blurb: 'Glue code, data pulls, scheduled jobs.' },
-  { id: 'data-analysis', label: 'Data analysis & notebooks', blurb: 'Pandas, SQL, charts, exploration.' },
-  { id: 'legacy-refactor', label: 'Refactor an existing codebase', blurb: 'Large repo, careful edits, tests.' },
-  { id: 'mobile-app', label: 'Build a mobile app', blurb: 'React Native / Expo, native features.' },
-  { id: 'learn', label: 'Learn to code', blurb: 'Explanations, guardrails, small steps.' },
+  { id: 'free', label: 'Free / self-hosted', cap: 0, hint: 'Local models or free tiers only — zero token spend.' },
+  { id: 'low', label: 'Up to $25/mo in tokens', cap: 25, hint: 'A side project or first MVP.' },
+  { id: 'mid', label: 'Up to $75/mo in tokens', cap: 75, hint: 'A daily driver with real usage volume.' },
+  { id: 'high', label: 'No cap', cap: Infinity, hint: 'Scale the tokens to ship faster.' },
 ];
 
 export const COMBOS = [
@@ -51,7 +46,7 @@ export const COMBOS = [
     toolType: 'desktop',
     model: 'Sonnet 5',
     provider: 'Anthropic',
-    tasks: ['web-app', 'shopify-app', 'automation', 'data-analysis', 'legacy-refactor', 'learn'],
+    tasks: ['web-app', 'shopify-app', 'directory', 'ai-agent', 'landing-page'],
     minSkill: 'beginner',
     pricing: 'subscription',
     monthlyLow: 20,
@@ -59,7 +54,7 @@ export const COMBOS = [
     setup: 1,
     surface: 'app',
     pros: ['Desktop app, works alongside your files', 'Handles multi-step tasks with little steering', 'Flat monthly price, no token math'],
-    cons: ['Subscription, no free tier', 'Less control than a raw CLI'],
+    cons: ['Subscription, no free tier', 'No BYOK option — you can’t swap in your own API key'],
     guide: 'claude-cowork-setup',
     link: 'https://www.anthropic.com',
   },
@@ -69,14 +64,14 @@ export const COMBOS = [
     toolType: 'cli',
     model: 'Sonnet 5',
     provider: 'Anthropic',
-    tasks: ['web-app', 'shopify-app', 'automation', 'legacy-refactor', 'mobile-app', 'data-analysis'],
+    tasks: ['web-app', 'shopify-app', 'mobile-app', 'directory', 'browser-extension', 'ai-agent', 'api-backend'],
     minSkill: 'intermediate',
     pricing: 'subscription',
     monthlyLow: 20,
     monthlyHigh: 100,
     setup: 3,
     surface: 'terminal',
-    pros: ['Agentic, edits across your whole repo', 'Terminal-native, scriptable', 'Strong on large refactors'],
+    pros: ['Agentic, edits across your whole repo', 'Terminal-native, scriptable', 'Also runs on pay-as-you-go Anthropic API billing instead of a subscription'],
     cons: ['Terminal comfort required', 'Higher tiers get pricey under heavy use'],
     guide: 'claude-code-setup',
     link: 'https://www.anthropic.com',
@@ -87,7 +82,7 @@ export const COMBOS = [
     toolType: 'ide',
     model: 'Sonnet 5',
     provider: 'Anthropic (via Cursor)',
-    tasks: ['web-app', 'landing-page', 'shopify-app', 'legacy-refactor', 'mobile-app'],
+    tasks: ['web-app', 'landing-page', 'shopify-app', 'mobile-app', 'directory'],
     minSkill: 'intermediate',
     pricing: 'subscription',
     monthlyLow: 20,
@@ -105,7 +100,7 @@ export const COMBOS = [
     toolType: 'cli',
     model: 'DeepSeek V3',
     provider: 'DeepSeek (BYOK)',
-    tasks: ['web-app', 'automation', 'legacy-refactor', 'data-analysis'],
+    tasks: ['web-app', 'directory', 'browser-extension', 'ai-agent', 'api-backend'],
     minSkill: 'pro',
     pricing: 'byok',
     monthlyLow: 2,
@@ -123,7 +118,7 @@ export const COMBOS = [
     toolType: 'cli',
     model: 'Sonnet 5',
     provider: 'Anthropic (BYOK)',
-    tasks: ['web-app', 'legacy-refactor', 'automation', 'shopify-app'],
+    tasks: ['web-app', 'shopify-app', 'directory', 'browser-extension', 'ai-agent', 'api-backend'],
     minSkill: 'pro',
     pricing: 'byok',
     monthlyLow: 15,
@@ -141,7 +136,7 @@ export const COMBOS = [
     toolType: 'extension',
     model: 'DeepSeek V3',
     provider: 'DeepSeek (BYOK)',
-    tasks: ['web-app', 'automation', 'landing-page', 'data-analysis'],
+    tasks: ['web-app', 'browser-extension', 'ai-agent', 'landing-page', 'api-backend'],
     minSkill: 'intermediate',
     pricing: 'byok',
     monthlyLow: 2,
@@ -159,7 +154,7 @@ export const COMBOS = [
     toolType: 'ide',
     model: 'Sonnet 5',
     provider: 'Anthropic (via Windsurf)',
-    tasks: ['web-app', 'landing-page', 'mobile-app', 'legacy-refactor'],
+    tasks: ['web-app', 'landing-page', 'mobile-app', 'directory'],
     minSkill: 'intermediate',
     pricing: 'subscription',
     monthlyLow: 15,
@@ -177,7 +172,7 @@ export const COMBOS = [
     toolType: 'browser',
     model: 'Managed (Anthropic)',
     provider: 'StackBlitz',
-    tasks: ['web-app', 'landing-page', 'shopify-app'],
+    tasks: ['web-app', 'landing-page', 'shopify-app', 'directory'],
     minSkill: 'beginner',
     pricing: 'subscription',
     monthlyLow: 0,
@@ -195,7 +190,7 @@ export const COMBOS = [
     toolType: 'browser',
     model: 'Managed (Anthropic)',
     provider: 'Lovable',
-    tasks: ['web-app', 'landing-page'],
+    tasks: ['web-app', 'landing-page', 'directory'],
     minSkill: 'beginner',
     pricing: 'subscription',
     monthlyLow: 0,
@@ -213,7 +208,7 @@ export const COMBOS = [
     toolType: 'extension',
     model: 'Qwen 2.5 Coder (local)',
     provider: 'Ollama (local)',
-    tasks: ['automation', 'data-analysis', 'learn', 'landing-page'],
+    tasks: ['web-app', 'browser-extension', 'ai-agent', 'landing-page', 'api-backend'],
     minSkill: 'pro',
     pricing: 'free',
     monthlyLow: 0,
@@ -231,7 +226,7 @@ export const COMBOS = [
     toolType: 'extension',
     model: 'Multiple (GPT / Sonnet)',
     provider: 'GitHub',
-    tasks: ['web-app', 'automation', 'legacy-refactor', 'learn', 'mobile-app'],
+    tasks: ['web-app', 'mobile-app', 'landing-page'],
     minSkill: 'beginner',
     pricing: 'subscription',
     monthlyLow: 0,
@@ -246,10 +241,7 @@ export const COMBOS = [
 ];
 
 // Scoring: given a user's picks, return matching combos ranked best-first.
-export function rankCombos({ task, skill, budgetCap }) {
-  const skillOrder = { beginner: 0, intermediate: 1, pro: 2 };
-  const userSkill = skillOrder[skill];
-
+export function rankCombos({ task, budgetCap }) {
   return COMBOS
     .filter((c) => c.tasks.includes(task))
     .filter((c) => c.monthlyLow <= budgetCap)
@@ -257,22 +249,23 @@ export function rankCombos({ task, skill, budgetCap }) {
       let score = 0;
       const notes = [];
 
-      // Skill fit: penalise combos above the user's level, reward a clean match.
-      const gap = skillOrder[c.minSkill] - userSkill;
-      if (gap <= 0) score += 30;
-      if (gap === 1) { score += 5; notes.push('A step above your level — doable, but expect a learning curve.'); }
-      if (gap >= 2) { score -= 20; notes.push('Aimed at experienced developers; likely frustrating at your level.'); }
-
       // Budget fit: reward staying comfortably under the cap.
       if (c.monthlyHigh <= budgetCap) score += 20;
       else if (c.monthlyLow <= budgetCap) { score += 8; notes.push(`Can exceed your budget under heavy use (up to $${c.monthlyHigh}/mo).`); }
 
-      // Ease of setup matters more for beginners.
-      const easeWeight = skill === 'beginner' ? 4 : skill === 'intermediate' ? 2 : 1;
-      score += (5 - c.setup) * easeWeight;
+      // Ease of setup — this audience is assumed technical, so weight it lightly.
+      score += (5 - c.setup) * 2;
 
-      // Free is a bonus when the user cares about budget.
-      if (c.pricing === 'free' && budgetCap < Infinity) score += 6;
+      // Pricing model: reward API-native pricing, penalise flat subscriptions —
+      // this site is built for builders who work with API access, not bundled seats.
+      if (c.pricing === 'byok' || c.pricing === 'usage') {
+        score += 15;
+      } else if (c.pricing === 'free') {
+        score += 10;
+      } else if (c.pricing === 'subscription') {
+        score -= 15;
+        notes.push('Flat subscription — you pay the same whether you ship one feature or fifty.');
+      }
 
       return { ...c, score, notes };
     })

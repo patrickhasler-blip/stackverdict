@@ -1,8 +1,12 @@
 # StackVerdict — project guide for Claude Code
 
 StackVerdict (stackverdict.dev) is a comparison site — "Stiftung Warentest for AI
-coding tools." Users answer three questions (task, skill, budget) and get a ranked
-verdict of tool + model pairings, backed by SEO setup guides.
+coding tools," niched to solopreneurs building real products (Shopify apps, mobile
+apps, directories, browser extensions, AI agents/chatbots, API backends) who work
+with API access rather than bundled subscriptions. Users answer two questions (what
+they're building, API budget) and get a ranked verdict of tool + model pairings,
+backed by SEO setup guides. The ranking logic in `rankCombos()` deliberately rewards
+BYOK/usage pricing and penalises flat subscriptions — that bias is the point, not a bug.
 
 ## Stack
 - Astro 5 (static output), one React island for the wizard.
@@ -10,11 +14,11 @@ verdict of tool + model pairings, backed by SEO setup guides.
 - Deployed as a static site (Cloudflare Pages / Vercel). `npm run build` -> `dist/`.
 
 ## Where things live
-- `src/data/combos.js` — THE source of truth. Tool+model pairings, the task/skill/
-  budget taxonomy, and the `rankCombos()` scoring logic. Editing this is 90% of
+- `src/data/combos.js` — THE source of truth. Tool+model pairings, the task/budget
+  taxonomy, and the `rankCombos()` scoring logic. Editing this is 90% of
   maintenance. Every combo auto-generates a `/compare/<id>` page and appears in the
   wizard. No other file needs touching to add a tool.
-- `src/components/Wizard.jsx` — the 3-step flow (React island, client:load).
+- `src/components/Wizard.jsx` — the 2-step flow: task, then budget (React island, client:load).
 - `src/pages/index.astro` — homepage + hero.
 - `src/pages/guides/*.astro` — SEO setup guides. One per tool is the growth engine.
 - `src/pages/compare/[id].astro` — generates one detail page per combo automatically.

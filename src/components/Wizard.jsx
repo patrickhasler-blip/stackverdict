@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { TASKS, SKILL_LEVELS, BUDGETS, rankCombos } from '../data/combos.js';
+import { TASKS, BUDGETS, rankCombos } from '../data/combos.js';
 
-const STEPS = ['task', 'skill', 'budget', 'results'];
+const STEPS = ['task', 'budget', 'results'];
 
 function Meter({ label, value, max, unit }) {
   const pct = Math.min(100, Math.round((value / max) * 100));
@@ -37,9 +37,8 @@ function ResultCard({ combo, rank, budgetCap }) {
         </div>
       </div>
 
-      <div className="rescard-meters">
+      <div className="rescard-meters rescard-meters-single">
         <Meter label="Setup effort" value={combo.setup} max={5} unit={setupWord(combo.setup)} />
-        <Meter label="Skill floor" value={skillNum(combo.minSkill)} max={3} unit={combo.minSkill} />
       </div>
 
       <div className="rescard-cols">
@@ -71,30 +70,28 @@ function labelFor(p) {
   return { free: 'free', byok: 'bring your own key', subscription: 'subscription', usage: 'pay per use' }[p];
 }
 function setupWord(n) { return ['', 'one click', 'quick', 'moderate', 'involved', 'advanced'][n]; }
-function skillNum(s) { return { beginner: 1, intermediate: 2, pro: 3 }[s]; }
 
 export default function Wizard() {
   const [step, setStep] = useState(0);
   const [task, setTask] = useState(null);
-  const [skill, setSkill] = useState(null);
   const [budget, setBudget] = useState(null);
 
   const budgetCap = budget ? BUDGETS.find((b) => b.id === budget).cap : Infinity;
 
   const results = useMemo(() => {
-    if (!task || !skill || !budget) return [];
-    return rankCombos({ task, skill, budgetCap });
-  }, [task, skill, budget, budgetCap]);
+    if (!task || !budget) return [];
+    return rankCombos({ task, budgetCap });
+  }, [task, budget, budgetCap]);
 
-  const canNext = [task, skill, budget][step] != null;
+  const canNext = [task, budget][step] != null;
   const current = STEPS[step];
 
-  const reset = () => { setStep(0); setTask(null); setSkill(null); setBudget(null); };
+  const reset = () => { setStep(0); setTask(null); setBudget(null); };
 
   return (
     <div className="wizard">
       <ol className="wiz-progress" aria-label="Progress">
-        {['Task', 'Skill', 'Budget', 'Matches'].map((l, i) => (
+        {['Task', 'Budget', 'Matches'].map((l, i) => (
           <li key={l} className={i === step ? 'is-active' : i < step ? 'is-done' : ''}>
             <span className="wiz-dot">{i < step ? '✓' : i + 1}</span>{l}
           </li>
@@ -116,24 +113,9 @@ export default function Wizard() {
         </fieldset>
       )}
 
-      {current === 'skill' && (
-        <fieldset className="wiz-step">
-          <legend>How much do you code?</legend>
-          <div className="opt-grid opt-grid-3">
-            {SKILL_LEVELS.map((s) => (
-              <button key={s.id} className={`opt ${skill === s.id ? 'is-sel' : ''}`}
-                onClick={() => setSkill(s.id)}>
-                <span className="opt-title">{s.label}</span>
-                <span className="opt-blurb">{s.hint}</span>
-              </button>
-            ))}
-          </div>
-        </fieldset>
-      )}
-
       {current === 'budget' && (
         <fieldset className="wiz-step">
-          <legend>What can you spend per month?</legend>
+          <legend>How much API spend can you take per month?</legend>
           <div className="opt-grid opt-grid-2">
             {BUDGETS.map((b) => (
               <button key={b.id} className={`opt ${budget === b.id ? 'is-sel' : ''}`}
@@ -164,7 +146,7 @@ export default function Wizard() {
             onClick={() => setStep((s) => s - 1)}>Back</button>
           <button className="btn btn-primary" disabled={!canNext}
             onClick={() => setStep((s) => s + 1)}>
-            {step === 2 ? 'See matches' : 'Next'}
+            {step === 1 ? 'See matches' : 'Next'}
           </button>
         </div>
       )}
