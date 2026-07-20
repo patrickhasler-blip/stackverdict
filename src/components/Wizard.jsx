@@ -1,7 +1,12 @@
 import { useState, useMemo } from 'react';
-import { TASKS, BUDGETS, rankCombos } from '../data/combos.js';
+import { TASKS, VOLUME_LEVELS, rankCombos } from '../data/combos.js';
 
-const STEPS = ['task', 'budget', 'results'];
+const STEPS = ['task', 'volume', 'results'];
+
+function formatCost(n) {
+  if (n === 0) return 'Free';
+  return n < 10 ? `$${n.toFixed(2)}/mo` : `$${Math.round(n)}/mo`;
+}
 
 function Meter({ label, value, max, unit }) {
   const pct = Math.min(100, Math.round((value / max) * 100));
@@ -16,12 +21,9 @@ function Meter({ label, value, max, unit }) {
   );
 }
 
-function ResultCard({ combo, rank, budgetCap }) {
-  const cost = combo.monthlyLow === 0 && combo.monthlyHigh === 0
-    ? 'Free'
-    : combo.monthlyLow === combo.monthlyHigh
-      ? `$${combo.monthlyLow}/mo`
-      : `$${combo.monthlyLow}–${combo.monthlyHigh}/mo`;
+function ResultCard({ combo, rank }) {
+  const isEstimate = combo.pricing === 'byok' || combo.pricing === 'usage';
+  const cost = `${isEstimate && combo.actualCost > 0 ? '~' : ''}${formatCost(combo.actualCost)}`;
 
   return (
     <article className={`rescard ${rank === 0 ? 'is-top' : ''}`}>
@@ -74,24 +76,22 @@ function setupWord(n) { return ['', 'one click', 'quick', 'moderate', 'involved'
 export default function Wizard() {
   const [step, setStep] = useState(0);
   const [task, setTask] = useState(null);
-  const [budget, setBudget] = useState(null);
-
-  const budgetCap = budget ? BUDGETS.find((b) => b.id === budget).cap : Infinity;
+  const [volume, setVolume] = useState(null);
 
   const results = useMemo(() => {
-    if (!task || !budget) return [];
-    return rankCombos({ task, budgetCap });
-  }, [task, budget, budgetCap]);
+    if (!task || !volume) return [];
+    return rankCombos({ task, volume });
+  }, [task, volume]);
 
-  const canNext = [task, budget][step] != null;
+  const canNext = [task, volume][step] != null;
   const current = STEPS[step];
 
-  const reset = () => { setStep(0); setTask(null); setBudget(null); };
+  const reset = () => { setStep(0); setTask(null); setVolume(null); };
 
   return (
     <div className="wizard">
       <ol className="wiz-progress" aria-label="Progress">
-        {['Task', 'Budget', 'Matches'].map((l, i) => (
+        {['Task', 'Usage', 'Matches'].map((l, i) => (
           <li key={l} className={i === step ? 'is-active' : i < step ? 'is-done' : ''}>
             <span className="wiz-dot">{i < step ? '✓' : i + 1}</span>{l}
           </li>
@@ -113,15 +113,15 @@ export default function Wizard() {
         </fieldset>
       )}
 
-      {current === 'budget' && (
+      {current === 'volume' && (
         <fieldset className="wiz-step">
-          <legend>How much API spend can you take per month?</legend>
+          <legend>How much do you actually use AI coding tools?</legend>
           <div className="opt-grid opt-grid-2">
-            {BUDGETS.map((b) => (
-              <button key={b.id} className={`opt ${budget === b.id ? 'is-sel' : ''}`}
-                onClick={() => setBudget(b.id)}>
-                <span className="opt-title">{b.label}</span>
-                <span className="opt-blurb">{b.hint}</span>
+            {VOLUME_LEVELS.map((v) => (
+              <button key={v.id} className={`opt ${volume === v.id ? 'is-sel' : ''}`}
+                onClick={() => setVolume(v.id)}>
+                <span className="opt-title">{v.label}</span>
+                <span className="opt-blurb">{v.hint}</span>
               </button>
             ))}
           </div>
@@ -134,9 +134,7 @@ export default function Wizard() {
             <h2>{results.length} match{results.length === 1 ? '' : 'es'} for your build</h2>
             <button className="btn btn-ghost" onClick={reset}>Start over</button>
           </div>
-          {results.length === 0
-            ? <p className="wiz-empty">Nothing fits those constraints yet. Try raising your budget or picking a different task.</p>
-            : results.map((c, i) => <ResultCard key={c.id} combo={c} rank={i} budgetCap={budgetCap} />)}
+          {results.map((c, i) => <ResultCard key={c.id} combo={c} rank={i} />)}
         </div>
       )}
 

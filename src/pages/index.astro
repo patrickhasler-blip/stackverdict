@@ -5,18 +5,19 @@ import { COMBOS } from '../data/combos.js';
 const toolCount = new Set(COMBOS.map((c) => c.tool)).size;
 ---
 <Base
-  title="Find the right AI coding stack for solo builders"
-  description="Tell us what you're shipping — a Shopify app, a mobile app, a directory — and your API budget. Get a ranked comparison of AI coding tools and models built for solopreneurs who work with API access, not bundled subscriptions."
+  title="Subscription or API? The AI coding cost calculator for freelancers"
+  description="Tell us what you're shipping and how much you actually use AI coding tools. We calculate whether a flat subscription or raw API access is cheaper for you — no guessing, real numbers."
   canonical="https://stackverdict.dev/"
 >
   <section class="hero">
     <div class="wrap hero-inner">
-      <p class="eyebrow">The verdict engine for solo builders</p>
-      <h1>The right AI coding<br />stack, judged for you.</h1>
+      <p class="eyebrow">The cost calculator for freelance builders</p>
+      <h1>Subscription or API?<br />We do the math.</h1>
       <p class="hero-lede">
         {toolCount} tools, dozens of tool-and-model pairings. Tell us what you're shipping
-        &mdash; a Shopify app, a mobile app, a directory &mdash; and how much API spend you can
-        take. We rank the pairings that actually fit, no bundled subscription required.
+        &mdash; a Shopify app, a mobile app, a directory &mdash; and how much you actually use
+        AI coding tools. We estimate the real monthly cost of each pairing and tell you straight:
+        subscription or API access, whichever is cheaper for you.
       </p>
       <a class="btn btn-primary btn-lg" href="#find">Find my stack &rarr;</a>
     </div>
@@ -36,13 +37,13 @@ const toolCount = new Set(COMBOS.map((c) => c.tool)).size;
       </li>
       <li>
         <span class="how-n">02</span>
-        <h3>Set your API budget</h3>
-        <p>Most of these tools run on pay-as-you-go API keys, not flat seats. Tell us your ceiling.</p>
+        <h3>Tell us your usage</h3>
+        <p>A few hours a week or running constantly — usage volume is what actually decides subscription vs. API.</p>
       </li>
       <li>
         <span class="how-n">03</span>
-        <h3>Compare &amp; set up</h3>
-        <p>Get a ranked shortlist with real trade-offs, then a step-by-step setup guide for the one you choose.</p>
+        <h3>See the real cost</h3>
+        <p>Every match shows its estimated monthly cost and, where it applies, what the same usage would cost on raw API pricing instead.</p>
       </li>
     </ol>
   </section>

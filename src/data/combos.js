@@ -6,20 +6,25 @@
 //   id            unique slug
 //   tool          the coding agent / IDE
 //   toolType      "cli" | "ide" | "desktop" | "extension"
-//   model         the LLM it runs on (for this recommended pairing)
+//   model         the LLM it runs on (for this recommended pairing) — must
+//                 match a key in src/data/model-prices.js to get a
+//                 subscription-vs-API cost comparison in the wizard
 //   provider      who serves the model
 //   tasks         array of task ids this pairing is good at (see TASKS)
 //   minSkill      "beginner" | "intermediate" | "pro" — floor to be productive
 //                 (shown on compare pages; no longer asked in the wizard)
 //   pricing       "free" | "byok" | "subscription" | "usage"  (byok = bring your own API key)
 //   monthlyLow    typical low end of monthly spend in USD (0 = free)
-//   monthlyHigh   typical high end of monthly spend in USD
+//   monthlyHigh   typical high end of monthly spend in USD — used as the
+//                 flat cost for subscription/usage combos in the calculator
 //   setup         1 (one click) … 5 (terminal + keys + config)
 //   surface       "terminal" | "editor" | "app" | "browser"
 //   pros          array of short strings
 //   cons          array of short strings
 //   guide         optional slug of an in-site setup guide
 //   link          outbound reference
+
+import { estimateApiCost } from './model-prices.js';
 
 export const TASKS = [
   { id: 'shopify-app', label: 'Build a Shopify app', blurb: 'Embedded app, Polaris UI, webhooks, billing.' },
@@ -32,11 +37,14 @@ export const TASKS = [
   { id: 'landing-page', label: 'Landing page', blurb: 'Static, fast, SEO-friendly — the front door for your product.' },
 ];
 
-export const BUDGETS = [
-  { id: 'free', label: 'Free / self-hosted', cap: 0, hint: 'Local models or free tiers only — zero token spend.' },
-  { id: 'low', label: 'Up to $25/mo in tokens', cap: 25, hint: 'A side project or first MVP.' },
-  { id: 'mid', label: 'Up to $75/mo in tokens', cap: 75, hint: 'A daily driver with real usage volume.' },
-  { id: 'high', label: 'No cap', cap: Infinity, hint: 'Scale the tokens to ship faster.' },
+// How much you actually use AI coding tools, in hours/month of active,
+// agentic use. This drives the subscription-vs-API cost estimate below —
+// it replaces a flat "budget" guess with a real breakeven calculation.
+export const VOLUME_LEVELS = [
+  { id: 'light', label: 'A few hours a week', hoursPerMonth: 8, hint: '~8 hrs/month — occasional help, small fixes.' },
+  { id: 'regular', label: 'Part-time, most workdays', hoursPerMonth: 40, hint: '~40 hrs/month — a steady sidekick for client work.' },
+  { id: 'heavy', label: 'Heavy daily use', hoursPerMonth: 100, hint: '~100 hrs/month — agentic, multi-file tasks most of the day.' },
+  { id: 'always-on', label: 'Running constantly', hoursPerMonth: 200, hint: '~200+ hrs/month — near-continuous, across client projects.' },
 ];
 
 export const COMBOS = [
@@ -98,7 +106,7 @@ export const COMBOS = [
     id: 'aider-deepseek',
     tool: 'Aider',
     toolType: 'cli',
-    model: 'DeepSeek V3',
+    model: 'DeepSeek V4 Flash',
     provider: 'DeepSeek (BYOK)',
     tasks: ['web-app', 'directory', 'browser-extension', 'ai-agent', 'api-backend'],
     minSkill: 'pro',
@@ -134,7 +142,7 @@ export const COMBOS = [
     id: 'cline-deepseek',
     tool: 'Cline',
     toolType: 'extension',
-    model: 'DeepSeek V3',
+    model: 'DeepSeek V4 Flash',
     provider: 'DeepSeek (BYOK)',
     tasks: ['web-app', 'browser-extension', 'ai-agent', 'landing-page', 'api-backend'],
     minSkill: 'intermediate',
@@ -240,34 +248,40 @@ export const COMBOS = [
   },
 ];
 
-// Scoring: given a user's picks, return matching combos ranked best-first.
-export function rankCombos({ task, budgetCap }) {
+function round2(n) { return Math.round(n * 100) / 100; }
+
+// Scoring: given a user's picks, return matching combos ranked cheapest-first,
+// with an estimated real monthly cost and a subscription-vs-API verdict note.
+export function rankCombos({ task, volume }) {
+  const hoursPerMonth = VOLUME_LEVELS.find((v) => v.id === volume)?.hoursPerMonth ?? 0;
+
   return COMBOS
     .filter((c) => c.tasks.includes(task))
-    .filter((c) => c.monthlyLow <= budgetCap)
     .map((c) => {
-      let score = 0;
       const notes = [];
+      const apiEstimate = estimateApiCost(c.model, hoursPerMonth);
+      let actualCost;
 
-      // Budget fit: reward staying comfortably under the cap.
-      if (c.monthlyHigh <= budgetCap) score += 20;
-      else if (c.monthlyLow <= budgetCap) { score += 8; notes.push(`Can exceed your budget under heavy use (up to $${c.monthlyHigh}/mo).`); }
-
-      // Ease of setup — this audience is assumed technical, so weight it lightly.
-      score += (5 - c.setup) * 2;
-
-      // Pricing model: reward API-native pricing, penalise flat subscriptions —
-      // this site is built for builders who work with API access, not bundled seats.
-      if (c.pricing === 'byok' || c.pricing === 'usage') {
-        score += 15;
-      } else if (c.pricing === 'free') {
-        score += 10;
-      } else if (c.pricing === 'subscription') {
-        score -= 15;
-        notes.push('Flat subscription — you pay the same whether you ship one feature or fifty.');
+      if (c.pricing === 'free') {
+        actualCost = 0;
+        notes.push('Runs free regardless of usage — no token costs.');
+      } else if (c.pricing === 'byok' || c.pricing === 'usage') {
+        actualCost = apiEstimate ?? (c.monthlyLow + c.monthlyHigh) / 2;
+        if (apiEstimate != null) notes.push(`Estimated ~$${round2(apiEstimate)}/mo in raw API cost at your usage level.`);
+      } else {
+        // subscription — flat fee, but show what the same usage would cost on the raw API.
+        actualCost = c.monthlyHigh;
+        if (apiEstimate != null) {
+          notes.push(apiEstimate > c.monthlyHigh
+            ? `At your usage, raw ${c.model} API pricing would run ~$${round2(apiEstimate)}/mo — the $${c.monthlyHigh}/mo subscription is the cheaper route.`
+            : `At your usage, raw ${c.model} API pricing would only run ~$${round2(apiEstimate)}/mo — you may be overpaying with this subscription.`);
+        }
       }
 
-      return { ...c, score, notes };
+      // Cheaper wins, with a small tie-break for easier setup.
+      const score = -actualCost * 2 + (5 - c.setup) * 1.5;
+
+      return { ...c, actualCost, apiEstimate, score, notes };
     })
     .sort((a, b) => b.score - a.score);
 }

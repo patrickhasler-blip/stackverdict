@@ -1,12 +1,13 @@
 # StackVerdict — project guide for Claude Code
 
-StackVerdict (stackverdict.dev) is a comparison site — "Stiftung Warentest for AI
-coding tools," niched to solopreneurs building real products (Shopify apps, mobile
-apps, directories, browser extensions, AI agents/chatbots, API backends) who work
-with API access rather than bundled subscriptions. Users answer two questions (what
-they're building, API budget) and get a ranked verdict of tool + model pairings,
-backed by SEO setup guides. The ranking logic in `rankCombos()` deliberately rewards
-BYOK/usage pricing and penalises flat subscriptions — that bias is the point, not a bug.
+StackVerdict (stackverdict.dev) is a subscription-vs-API cost calculator for
+freelancers building real products (Shopify apps, mobile apps, directories, browser
+extensions, AI agents/chatbots, API backends). Users answer two questions (what
+they're building, how much they actually use AI coding tools) and get a ranked
+verdict of tool + model pairings, each with a real estimated monthly cost and,
+where it applies, a note on whether a subscription or raw API access is cheaper
+for them. The ranking logic in `rankCombos()` sorts cheapest-first — that bias is
+the point, not a bug.
 
 ## Stack
 - Astro 5 (static output), one React island for the wizard.
@@ -14,11 +15,16 @@ BYOK/usage pricing and penalises flat subscriptions — that bias is the point, 
 - Deployed as a static site (Cloudflare Pages / Vercel). `npm run build` -> `dist/`.
 
 ## Where things live
-- `src/data/combos.js` — THE source of truth. Tool+model pairings, the task/budget
+- `src/data/combos.js` — THE source of truth. Tool+model pairings, the task/usage
   taxonomy, and the `rankCombos()` scoring logic. Editing this is 90% of
   maintenance. Every combo auto-generates a `/compare/<id>` page and appears in the
   wizard. No other file needs touching to add a tool.
-- `src/components/Wizard.jsx` — the 2-step flow: task, then budget (React island, client:load).
+- `src/data/model-prices.js` — raw per-token API prices (USD per million tokens).
+  **This is the one file to touch when a provider changes pricing.** Edit the
+  numbers, commit, push — Vercel auto-deploys from GitHub, live in ~1 minute. No
+  backend, no database, no admin panel needed. Only models listed here get a
+  subscription-vs-API comparison in the wizard.
+- `src/components/Wizard.jsx` — the 2-step flow: task, then usage volume (React island, client:load).
 - `src/pages/index.astro` — homepage + hero.
 - `src/pages/guides/*.astro` — SEO setup guides. One per tool is the growth engine.
 - `src/pages/compare/[id].astro` — generates one detail page per combo automatically.
@@ -37,8 +43,11 @@ BYOK/usage pricing and penalises flat subscriptions — that bias is the point, 
 ## Common maintenance tasks
 - Add a tool: append an object to COMBOS in src/data/combos.js. Fill every field.
   If you write a guide for it, set `guide` to the guide's slug.
-- Update pricing: edit monthlyLow/monthlyHigh on the relevant combo. Prices change
-  often — most frequent edit. Verify against the tool's real pricing page first.
+- Update subscription pricing: edit monthlyLow/monthlyHigh on the relevant combo.
+- Update raw API token prices: edit src/data/model-prices.js — this is what drives
+  the calculator's cost estimates for BYOK/usage combos and the "at your usage,
+  raw API would cost ~$X" notes on subscription combos. Prices change often —
+  most frequent edit. Verify against the tool's/provider's real pricing page first.
 - Add a guide: create src/pages/guides/<slug>.astro, copy the structure of
   aider-setup.astro, and link it from the relevant combo's `guide` field.
 - Never invent prices or features. If unsure, check the official source.

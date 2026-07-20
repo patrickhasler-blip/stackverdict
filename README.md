@@ -1,9 +1,10 @@
-# StackVerdict — Check24 for solo builders on API access
+# StackVerdict — subscription-vs-API cost calculator for freelancers
 
-A comparison engine for AI coding tools, niched to solopreneurs who build real products
-(Shopify apps, mobile apps, directories, browser extensions, AI agents) and pay for API
-access rather than bundled subscriptions. Users pick what they're building and their
-API budget, and get a ranked shortlist of tool + model pairings — plus SEO setup guides.
+A cost calculator for freelancers building real products (Shopify apps, mobile apps,
+directories, browser extensions, AI agents). Users pick what they're building and how
+much they actually use AI coding tools, and get a ranked shortlist of tool + model
+pairings — each with a real estimated monthly cost, and a note on whether a flat
+subscription or raw API access works out cheaper for their usage — plus SEO setup guides.
 
 ## Run it
 ```bash
@@ -21,7 +22,10 @@ Pages, or connect the repo for auto-deploys. Set the real domain in `astro.confi
 ## Where to edit things
 - `src/data/combos.js`   THE database. Add/edit tool+model pairings and the ranking
                          logic here. This is your moat — keep it current.
-- `src/components/Wizard.jsx`   The 2-step comparison flow: what you're building, then API budget (React island).
+- `src/data/model-prices.js`   Raw per-token API prices. **Edit this file to update
+                         token prices** — no backend or admin panel, just edit the
+                         numbers and push; Vercel auto-deploys in ~1 minute.
+- `src/components/Wizard.jsx`   The 2-step comparison flow: what you're building, then usage volume (React island).
 - `src/pages/index.astro`       Homepage + hero.
 - `src/pages/guides/*.astro`    SEO setup guides (aider, claude-code, cowork).
 - `src/pages/compare/[id].astro`  Auto-generates one indexable detail page per combo.
@@ -34,8 +38,8 @@ set its `guide` field to the guide's slug.
 
 ## Next steps to make it real
 1. Verify every price/task field against the tools' current pricing pages.
-2. Add affiliate/referral links in each combo's `link` field where programs exist.
-3. Write more SEO guides (one per tool) — they're your traffic engine.
-4. Add a sitemap.xml (@astrojs/sitemap) and analytics.
-5. Consider moving `combos.js` to a CMS/Airtable later so you can update prices
-   without a redeploy.
+2. Keep `model-prices.js` current — token prices change often and drive the
+   calculator's accuracy directly.
+3. Add affiliate/referral links in each combo's `link` field where programs exist.
+4. Write more SEO guides (one per tool) — they're your traffic engine.
+5. Add a sitemap.xml (@astrojs/sitemap) and analytics.
