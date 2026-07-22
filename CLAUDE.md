@@ -29,16 +29,17 @@ the point, not a bug.
 - `src/components/Wizard.jsx` — the 2-step flow: task, then usage volume (React island,
   client:load). Also has the results-page email capture (fake door, `EmailCapture`) and
   fires the `calculator_started` / `calculator_completed` / `email_submitted` analytics events.
-- `src/lib/analytics.js` — `trackEvent(name)` — thin wrapper around `window.plausible()`
-  that no-ops if Plausible isn't loaded (e.g. local dev). Use this, never call
-  `window.plausible` directly, so tracking calls can't break the page.
+- `src/lib/analytics.js` — `trackEvent(name)` — thin wrapper around `window.goatcounter.count()`
+  that polls briefly then no-ops if GoatCounter isn't loaded (e.g. local dev, or blocked
+  by an ad-blocker). Use this, never call `window.goatcounter` directly, so tracking
+  calls can't break the page.
 - `src/pages/index.astro` — homepage + hero.
 - `src/pages/guides/*.astro` — SEO setup guides. One per tool is the growth engine.
 - `src/pages/compare/[id].astro` — generates one detail page per combo automatically.
 - `src/pages/privacy.astro` — privacy policy. Currently a **draft placeholder** — has
   real legal review needed before you rely on it; see the callout on the page itself.
 - `src/layouts/Base.astro` — design tokens (CSS vars), global styles, header/footer,
-  all SEO/OG meta, and the conditional Plausible analytics script tag.
+  all SEO/OG meta, and the conditional GoatCounter analytics script tag.
 - `public/` — favicon, OG image, static assets.
 
 ## Brand (do not drift from this)
@@ -65,9 +66,10 @@ the point, not a bug.
 Both are optional at build time (see `.env.example`) — the site builds and runs fine
 with neither set, just without analytics or the email capture form.
 
-- `PUBLIC_PLAUSIBLE_DOMAIN` — your site's domain as registered in Plausible. Set only
-  in production. Leave unset in local dev/preview so the analytics script never loads
-  and nothing fires during development.
+- `PUBLIC_GOATCOUNTER_URL` — your site's GoatCounter counting endpoint (e.g.
+  `https://stackverdict.goatcounter.com/count`). Free for reasonable public use — no
+  30-day-trial limit like Plausible. Set only in production. Leave unset in local
+  dev/preview so the analytics script never loads and nothing fires during development.
 - `PUBLIC_FORM_ENDPOINT` — the endpoint the results-page email form POSTs to (default
   assumption: a Formspree form URL). Leave unset locally to hide the form entirely
   instead of showing one that goes nowhere.

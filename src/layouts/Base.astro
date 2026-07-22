@@ -3,7 +3,7 @@ const { title, description, canonical } = Astro.props;
 const site = 'StackVerdict';
 // Only set in production (Vercel project env vars) — stays unset in local dev
 // and preview builds, so no analytics script loads and nothing fires.
-const plausibleDomain = import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN;
+const goatcounterUrl = import.meta.env.PUBLIC_GOATCOUNTER_URL;
 ---
 <!doctype html>
 <html lang="en">
@@ -24,15 +24,11 @@ const plausibleDomain = import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN;
     <meta property="og:site_name" content={site} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://stackverdict.dev/og-image.png" />
-    {plausibleDomain && (
-      <Fragment>
-        {/* Cookie-free, no personal data, no consent banner needed — see /privacy.
-            Self-hosting Plausible? Point this src at your own instance instead. */}
-        <script is:inline>
-          window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments); };
-        </script>
-        <script defer data-domain={plausibleDomain} src="https://plausible.io/js/script.js"></script>
-      </Fragment>
+    {goatcounterUrl && (
+      // Cookie-free, no personal data, no consent banner needed — see /privacy.
+      // GoatCounter is free for reasonable public use; self-host instead if
+      // you outgrow that (https://www.goatcounter.com/help/host).
+      <script data-goatcounter={goatcounterUrl} async src="https://gc.zgo.at/count.js"></script>
     )}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
