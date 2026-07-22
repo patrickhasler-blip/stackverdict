@@ -70,9 +70,12 @@ with neither set, just without analytics or the email capture form.
   `https://stackverdict.goatcounter.com/count`). Free for reasonable public use — no
   30-day-trial limit like Plausible. Set only in production. Leave unset in local
   dev/preview so the analytics script never loads and nothing fires during development.
-- `PUBLIC_FORM_ENDPOINT` — the endpoint the results-page email form POSTs to (default
-  assumption: a Formspree form URL). Leave unset locally to hide the form entirely
-  instead of showing one that goes nowhere.
+- `PUBLIC_FORMSPREE_FORM_ID` — the Formspree form ID (not the full URL — just the id,
+  e.g. `xeeylgbq`) the results-page email form submits to via the official
+  `@formspree/react` SDK (`useForm`/`ValidationError` in `EmailCapture`, Wizard.jsx).
+  Leave unset locally to hide the form entirely instead of showing one that goes
+  nowhere. Note: this ties the form specifically to Formspree — swapping providers
+  later means swapping the SDK, not just the env var.
 
 **Where to set these for production:** this site is deployed on **Vercel**, not
 Cloudflare Pages — set them under the `stackverdict` Vercel project → Settings →

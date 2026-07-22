@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useForm, ValidationError } from '@formspree/react';
 import { TASKS, VOLUME_LEVELS, rankCombos } from '../data/combos.js';
 import { trackEvent } from '../lib/analytics.js';
 
@@ -70,49 +71,42 @@ function ResultCard({ combo, rank }) {
 }
 
 function EmailCapture() {
-  const [status, setStatus] = useState('idle'); // idle | sending | done
-  const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT;
+  const formId = import.meta.env.PUBLIC_FORMSPREE_FORM_ID;
+  const [state, formspreeSubmit] = useForm(formId);
 
-  if (!endpoint) return null; // not configured (e.g. local dev) — don't show a dead-end form
+  if (!formId) return null; // not configured (e.g. local dev) — don't show a dead-end form
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const email = e.target.elements.email.value;
+  function handleSubmit(e) {
     trackEvent('email_submitted');
-    setStatus('sending');
-    try {
-      await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ email, source: 'stackverdict-calculator' }),
-      });
-    } catch {
-      // No retry path from a static site — we still show the honest
-      // "we'll follow up" message either way; nothing to fall back to.
-    }
-    setStatus('done');
+    formspreeSubmit(e);
+  }
+
+  if (state.succeeded) {
+    return (
+      <div className="email-capture">
+        <p className="email-capture-done">Thanks — we'll be in touch once the deep-dive report is ready.</p>
+      </div>
+    );
   }
 
   return (
     <div className="email-capture">
-      {status === 'done' ? (
-        <p className="email-capture-done">Thanks — we'll be in touch once the deep-dive report is ready.</p>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <h3>Want the deep-dive report?</h3>
-          <p>Your optimal model mix per task, and your subscription-vs-API break-even point — as a PDF, once it's ready. This isn't built yet; leave your email and we'll notify you.</p>
-          <div className="email-capture-row">
-            <input type="email" name="email" required placeholder="you@example.com" aria-label="Email address" />
-            <button type="submit" className="btn btn-primary" disabled={status === 'sending'}>
-              {status === 'sending' ? 'Sending…' : "I'm interested"}
-            </button>
-          </div>
-          <label className="email-capture-consent">
-            <input type="checkbox" required />
-            I agree StackVerdict may email me when the deep-dive report is ready. See the <a href="/privacy">privacy policy</a>.
-          </label>
-        </form>
-      )}
+      <form onSubmit={handleSubmit}>
+        <h3>Want the deep-dive report?</h3>
+        <p>Your optimal model mix per task, and your subscription-vs-API break-even point — as a PDF, once it's ready. This isn't built yet; leave your email and we'll notify you.</p>
+        <div className="email-capture-row">
+          <input type="email" name="email" required placeholder="you@example.com" aria-label="Email address" />
+          <input type="hidden" name="source" value="stackverdict-calculator" />
+          <button type="submit" className="btn btn-primary" disabled={state.submitting}>
+            {state.submitting ? 'Sending…' : "I'm interested"}
+          </button>
+        </div>
+        <ValidationError prefix="Email" field="email" errors={state.errors} />
+        <label className="email-capture-consent">
+          <input type="checkbox" required />
+          I agree StackVerdict may email me when the deep-dive report is ready. See the <a href="/privacy">privacy policy</a>.
+        </label>
+      </form>
     </div>
   );
 }
