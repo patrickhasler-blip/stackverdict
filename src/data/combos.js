@@ -3,7 +3,8 @@
 // pages, and the SEO guides all read from it.
 //
 // Fields:
-//   id            unique slug
+//   id            unique slug — for subscription combos, also the key to
+//                 look up rate-limit assumptions in src/data/subscription-limits.js
 //   tool          the coding agent / IDE
 //   toolType      "cli" | "ide" | "desktop" | "extension"
 //   model         the LLM it runs on (for this recommended pairing) — must
@@ -25,6 +26,7 @@
 //   link          outbound reference
 
 import { estimateApiCost } from './model-prices.js';
+import { getLimitStatus, WORKDAYS_PER_MONTH } from './subscription-limits.js';
 
 export const TASKS = [
   { id: 'shopify-app', label: 'Build a Shopify app', blurb: 'Embedded app, Polaris UI, webhooks, billing.' },
@@ -37,15 +39,10 @@ export const TASKS = [
   { id: 'landing-page', label: 'Landing page', blurb: 'Static, fast, SEO-friendly — the front door for your product.' },
 ];
 
-// How much you actually use AI coding tools, in hours/month of active,
-// agentic use. This drives the subscription-vs-API cost estimate below —
-// it replaces a flat "budget" guess with a real breakeven calculation.
-export const VOLUME_LEVELS = [
-  { id: 'light', label: 'A few hours a week', hoursPerMonth: 8, hint: '~8 hrs/month — occasional help, small fixes.' },
-  { id: 'regular', label: 'Part-time, most workdays', hoursPerMonth: 40, hint: '~40 hrs/month — a steady sidekick for client work.' },
-  { id: 'heavy', label: 'Heavy daily use', hoursPerMonth: 100, hint: '~100 hrs/month — agentic, multi-file tasks most of the day.' },
-  { id: 'always-on', label: 'Running constantly', hoursPerMonth: 200, hint: '~200+ hrs/month — near-continuous, across client projects.' },
-];
+// Coding intensity is entered as hours/day (see the slider in Wizard.jsx) —
+// a tangible unit, not tokens. Bounds for that slider live here so the data
+// layer and the UI agree on the range.
+export const INTENSITY_HOURS_PER_DAY = { min: 0.5, max: 8, step: 0.5, default: 2 };
 
 export const COMBOS = [
   {
@@ -251,9 +248,11 @@ export const COMBOS = [
 function round2(n) { return Math.round(n * 100) / 100; }
 
 // Scoring: given a user's picks, return matching combos ranked cheapest-first,
-// with an estimated real monthly cost and a subscription-vs-API verdict note.
-export function rankCombos({ task, volume }) {
-  const hoursPerMonth = VOLUME_LEVELS.find((v) => v.id === volume)?.hoursPerMonth ?? 0;
+// with an estimated real monthly cost, a subscription-vs-API verdict note,
+// and — for subscription combos — a `limitStatus` (see subscription-limits.js)
+// describing whether this usage level runs into that plan's rate limit.
+export function rankCombos({ task, hoursPerDay }) {
+  const hoursPerMonth = hoursPerDay * WORKDAYS_PER_MONTH;
 
   return COMBOS
     .filter((c) => c.tasks.includes(task))
@@ -261,6 +260,7 @@ export function rankCombos({ task, volume }) {
       const notes = [];
       const apiEstimate = estimateApiCost(c.model, hoursPerMonth);
       let actualCost;
+      let limitStatus = null;
 
       if (c.pricing === 'free') {
         actualCost = 0;
@@ -271,6 +271,7 @@ export function rankCombos({ task, volume }) {
       } else {
         // subscription — flat fee, but show what the same usage would cost on the raw API.
         actualCost = c.monthlyHigh;
+        limitStatus = getLimitStatus(c, hoursPerDay);
         if (apiEstimate != null) {
           notes.push(apiEstimate > c.monthlyHigh
             ? `At your usage, raw ${c.model} API pricing would run ~$${round2(apiEstimate)}/mo — the $${c.monthlyHigh}/mo subscription is the cheaper route.`
@@ -281,7 +282,7 @@ export function rankCombos({ task, volume }) {
       // Cheaper wins, with a small tie-break for easier setup.
       const score = -actualCost * 2 + (5 - c.setup) * 1.5;
 
-      return { ...c, actualCost, apiEstimate, score, notes };
+      return { ...c, actualCost, apiEstimate, limitStatus, score, notes };
     })
     .sort((a, b) => b.score - a.score);
 }

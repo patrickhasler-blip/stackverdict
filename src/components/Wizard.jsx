@@ -1,13 +1,22 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useForm, ValidationError } from '@formspree/react';
-import { TASKS, VOLUME_LEVELS, rankCombos } from '../data/combos.js';
+import { TASKS, INTENSITY_HOURS_PER_DAY, rankCombos } from '../data/combos.js';
 import { trackEvent } from '../lib/analytics.js';
 
-const STEPS = ['task', 'volume', 'results'];
+const STEPS = ['task', 'intensity', 'results'];
 
 function formatCost(n) {
   if (n === 0) return 'Free';
   return n < 10 ? `$${n.toFixed(2)}/mo` : `$${Math.round(n)}/mo`;
+}
+function round1(n) { return Math.round(n * 10) / 10; }
+
+function confidenceNote(confidence) {
+  return {
+    verified: 'Provider-confirmed figure.',
+    estimated: "Unofficial estimate — the provider doesn't publish an exact number.",
+    vague: "Provider's own info is unclear or inconsistent — treat this as a rough guess.",
+  }[confidence] ?? '';
 }
 
 function Meter({ label, value, max, unit }) {
@@ -19,6 +28,60 @@ function Meter({ label, value, max, unit }) {
         <span className="meter-val">{unit}</span>
       </div>
       <div className="meter-track"><div className="meter-fill" style={{ width: `${pct}%` }} /></div>
+    </div>
+  );
+}
+
+function LimitPanel({ status, combo }) {
+  if (!status) return null;
+
+  if (status.confidence === 'unverifiable') {
+    return (
+      <div className="rescard-limit rescard-limit-unverifiable">
+        <p><strong>Limit unverifiable.</strong> {status.basis}{' '}
+          <a href={status.sourceUrl} target="_blank" rel="noopener">Check current plans →</a></p>
+      </div>
+    );
+  }
+
+  if (status.thresholdHoursPerDay == null) {
+    return (
+      <div className="rescard-limit rescard-limit-vague">
+        <p><strong>Limit unclear.</strong> {status.basis}{' '}
+          <a href={status.sourceUrl} target="_blank" rel="noopener">Check current limit →</a></p>
+      </div>
+    );
+  }
+
+  const thresholdLabel = `~${round1(status.thresholdHoursPerDay)} hrs/day`;
+  const note = confidenceNote(status.confidence);
+
+  if (!status.overLimit) {
+    return (
+      <div className="rescard-limit rescard-limit-ok">
+        <p>Comfortably within this plan's typical limit at your intensity — roughly good up to <strong>{thresholdLabel}</strong>. {note}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rescard-limit rescard-limit-warn">
+      <p className="rescard-limit-headline">⚠ At your intensity, you'll likely outrun this plan's limit — roughly good up to <strong>{thresholdLabel}</strong>. {note}</p>
+      <div className="rescard-limit-cols">
+        <div>
+          <span className="rescard-limit-label">Wait time</span>
+          {status.wait
+            ? <p>Roughly <strong>~{status.wait.timesPerWeek}×/week</strong>, blocked for about <strong>{round1(status.wait.hoursLow)}–{round1(status.wait.hoursHigh)}h</strong> until the window resets.</p>
+            : <p>No hard block — this plan just lets the cost rise instead (see next).</p>}
+        </div>
+        <div>
+          <span className="rescard-limit-label">Extra cost to avoid waiting</span>
+          {status.extraCostUsd != null
+            ? <p>{status.overage.label}: roughly <strong>~${round1(status.extraCostUsd)}/mo</strong> more.</p>
+            : <p>{status.overage?.label ?? 'Unclear — check the source.'}</p>}
+        </div>
+      </div>
+      <p className="rescard-limit-source"><a href={status.sourceUrl} target="_blank" rel="noopener">Check {combo.tool}'s current limit →</a></p>
     </div>
   );
 }
@@ -60,6 +123,8 @@ function ResultCard({ combo, rank }) {
         </div>
       )}
 
+      <LimitPanel status={combo.limitStatus} combo={combo} />
+
       <div className="rescard-foot">
         {combo.guide
           ? <a className="btn btn-primary" href={`/guides/${combo.guide}`}>Setup guide →</a>
@@ -72,7 +137,9 @@ function ResultCard({ combo, rank }) {
 
 function EmailCapture() {
   const formId = import.meta.env.PUBLIC_FORMSPREE_FORM_ID;
-  const [state, formspreeSubmit] = useForm(formId);
+  // useForm() throws if given a falsy id, so it needs a harmless placeholder
+  // when unconfigured — the early return below means it's never submitted.
+  const [state, formspreeSubmit] = useForm(formId || '_unconfigured');
 
   if (!formId) return null; // not configured (e.g. local dev) — don't show a dead-end form
 
@@ -119,15 +186,15 @@ function setupWord(n) { return ['', 'one click', 'quick', 'moderate', 'involved'
 export default function Wizard() {
   const [step, setStep] = useState(0);
   const [task, setTask] = useState(null);
-  const [volume, setVolume] = useState(null);
+  const [hoursPerDay, setHoursPerDay] = useState(INTENSITY_HOURS_PER_DAY.default);
   const startedRef = useRef(false);
 
   const results = useMemo(() => {
-    if (!task || !volume) return [];
-    return rankCombos({ task, volume });
-  }, [task, volume]);
+    if (!task) return [];
+    return rankCombos({ task, hoursPerDay });
+  }, [task, hoursPerDay]);
 
-  const canNext = [task, volume][step] != null;
+  const canNext = step === 0 ? task != null : true;
   const current = STEPS[step];
 
   useEffect(() => {
@@ -139,7 +206,7 @@ export default function Wizard() {
     setTask(id);
   };
 
-  const reset = () => { setStep(0); setTask(null); setVolume(null); };
+  const reset = () => { setStep(0); setTask(null); setHoursPerDay(INTENSITY_HOURS_PER_DAY.default); };
 
   return (
     <div className="wizard">
@@ -166,17 +233,16 @@ export default function Wizard() {
         </fieldset>
       )}
 
-      {current === 'volume' && (
+      {current === 'intensity' && (
         <fieldset className="wiz-step">
-          <legend>How much do you actually use AI coding tools?</legend>
-          <div className="opt-grid opt-grid-2">
-            {VOLUME_LEVELS.map((v) => (
-              <button key={v.id} className={`opt ${volume === v.id ? 'is-sel' : ''}`}
-                onClick={() => setVolume(v.id)}>
-                <span className="opt-title">{v.label}</span>
-                <span className="opt-blurb">{v.hint}</span>
-              </button>
-            ))}
+          <legend>How many hours a day do you actively use AI coding tools?</legend>
+          <div className="wiz-slider">
+            <input type="range" className="wiz-slider-input"
+              min={INTENSITY_HOURS_PER_DAY.min} max={INTENSITY_HOURS_PER_DAY.max} step={INTENSITY_HOURS_PER_DAY.step}
+              value={hoursPerDay} onChange={(e) => setHoursPerDay(Number(e.target.value))}
+              aria-label="Hours per day of active AI coding tool use" />
+            <div className="wiz-slider-value">{hoursPerDay} hrs/day</div>
+            <p className="wiz-slider-hint">Active, hands-on-keyboard time with the tool — not just "it was open." A rough gut estimate is fine.</p>
           </div>
         </fieldset>
       )}
@@ -187,6 +253,11 @@ export default function Wizard() {
             <h2>{results.length} match{results.length === 1 ? '' : 'es'} for your build</h2>
             <button className="btn btn-ghost" onClick={reset}>Start over</button>
           </div>
+          <p className="wiz-limit-disclaimer">
+            Subscription limits below are estimates — providers rarely publish exact numbers, and
+            they change often. Treat them as ballpark guidance, not guarantees, and check the linked
+            source before deciding.
+          </p>
           {results.map((c, i) => <ResultCard key={c.id} combo={c} rank={i} />)}
           {results.length > 0 && <EmailCapture />}
         </div>

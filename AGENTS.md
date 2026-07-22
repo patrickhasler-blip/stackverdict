@@ -3,11 +3,19 @@
 StackVerdict (stackverdict.dev) is a subscription-vs-API cost calculator for
 freelancers building real products (Shopify apps, mobile apps, directories, browser
 extensions, AI agents/chatbots, API backends). Users answer two questions (what
-they're building, how much they actually use AI coding tools) and get a ranked
-verdict of tool + model pairings, each with a real estimated monthly cost and,
-where it applies, a note on whether a subscription or raw API access is cheaper
-for them. The ranking logic in `rankCombos()` sorts cheapest-first — that bias is
-the point, not a bug.
+they're building, how many hours/day they actively use AI coding tools) and get a
+ranked verdict of tool + model pairings, each with a real estimated monthly cost
+and, where it applies, a note on whether a subscription or raw API access is
+cheaper for them. The ranking logic in `rankCombos()` sorts cheapest-first — that
+bias is the point, not a bug.
+
+Subscription combos also get a **rate-limit reality check**: most subscriptions
+cap usage (a rolling session window, a monthly $ or token allowance) and naively
+comparing flat price vs. API price ignores that. `getLimitStatus()` in
+`subscription-limits.js` translates the user's hours/day into a threshold and, if
+they're over it, shows both consequences side by side — estimated wait time
+(if the plan actually blocks you) and estimated extra cost (upgrade or overage) —
+rather than picking one "winner."
 
 ## Stack
 - Astro 5 (static output), one React island for the wizard.
@@ -26,9 +34,16 @@ the point, not a bug.
   numbers, commit, push — Vercel auto-deploys from GitHub, live in ~1 minute. No
   backend, no database, no admin panel needed. Only models listed here get a
   subscription-vs-API comparison in the wizard.
-- `src/components/Wizard.jsx` — the 2-step flow: task, then usage volume (React island,
-  client:load). Also has the results-page email capture (fake door, `EmailCapture`) and
-  fires the `calculator_started` / `calculator_completed` / `email_submitted` analytics events.
+- `src/data/subscription-limits.js` — **the one place** for subscription rate-limit/
+  quota assumptions, keyed by combo `id`. Every entry has a `confidence` level
+  ('verified' / 'estimated' / 'vague' / 'unverifiable') and a `basis` string
+  explaining where the number came from — read those before trusting a figure,
+  and re-check `sourceUrl` since providers change these often and rarely
+  document them well. `getLimitStatus()` is the only function that reads this file.
+- `src/components/Wizard.jsx` — the 2-step flow: task, then a coding-intensity slider
+  (hours/day, React island, client:load). Also has the results-page email capture
+  (fake door, `EmailCapture`) and fires the `calculator_started` /
+  `calculator_completed` / `email_submitted` analytics events.
 - `src/lib/analytics.js` — `trackEvent(name)` — thin wrapper around `window.goatcounter.count()`
   that polls briefly then no-ops if GoatCounter isn't loaded (e.g. local dev, or blocked
   by an ad-blocker). Use this, never call `window.goatcounter` directly, so tracking
@@ -58,9 +73,15 @@ the point, not a bug.
   the calculator's cost estimates for BYOK/usage combos and the "at your usage,
   raw API would cost ~$X" notes on subscription combos. Prices change often —
   most frequent edit. Verify against the tool's/provider's real pricing page first.
+- Update subscription rate limits: edit src/data/subscription-limits.js. Keep the
+  `confidence` level honest — don't upgrade an 'estimated'/'vague' entry to
+  'verified' unless the provider actually publishes that number.
 - Add a guide: create src/pages/guides/<slug>.astro, copy the structure of
   aider-setup.astro, and link it from the relevant combo's `guide` field.
 - Never invent prices or features. If unsure, check the official source.
+- **Known issue to resolve:** `windsurf-sonnet5` in combos.js may need removal —
+  windsurf.com now redirects to devin.ai with no mention of "Windsurf" (checked
+  2026-07-22). See the 'unverifiable' entry in subscription-limits.js.
 
 ## Environment variables
 Both are optional at build time (see `.env.example`) — the site builds and runs fine

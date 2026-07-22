@@ -124,10 +124,17 @@ const goatcounterUrl = import.meta.env.PUBLIC_GOATCOUNTER_URL;
 
       .wiz-nav { display: flex; justify-content: space-between; padding: 20px 28px; border-top: 2px solid var(--line); }
 
+      /* ---- intensity slider ---- */
+      .wiz-slider { max-width: 480px; }
+      .wiz-slider-input { width: 100%; accent-color: var(--verdict-deep); height: 28px; cursor: pointer; }
+      .wiz-slider-value { font-family: var(--display); font-weight: 700; font-size: 22px; margin: 4px 0 8px; }
+      .wiz-slider-hint { font-size: 14px; color: var(--slate); margin: 0; }
+
       /* ---- results ---- */
       .wiz-results { padding: 24px 28px 28px; }
       .wiz-results-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
       .wiz-results-head h2 { font-size: 22px; }
+      .wiz-limit-disclaimer { font-size: 13px; color: var(--slate); background: var(--paper-dim); border-radius: var(--radius); padding: 10px 14px; margin: 0 0 16px; }
 
       .rescard { border: 2px solid var(--line); border-radius: var(--radius); padding: 20px; margin-top: 16px; position: relative; background: var(--paper); }
       .rescard.is-top { border-color: var(--ink); box-shadow: 4px 4px 0 var(--verdict); }
@@ -156,6 +163,19 @@ const goatcounterUrl = import.meta.env.PUBLIC_GOATCOUNTER_URL;
       .rescard-cons li::before { content: '– '; color: var(--warn); font-weight: 700; }
       .rescard-notes { background: #ECF6F0; border-left: 3px solid var(--verdict-deep); padding: 10px 14px; margin: 12px 0; font-size: 13.5px; }
       .rescard-notes p { margin: 4px 0; }
+
+      /* ---- subscription limit panel ---- */
+      .rescard-limit { border-radius: var(--radius); padding: 10px 14px; margin: 12px 0; font-size: 13.5px; }
+      .rescard-limit p { margin: 4px 0; }
+      .rescard-limit-ok { background: #ECF6F0; border-left: 3px solid var(--verdict-deep); }
+      .rescard-limit-warn { background: #FBEDE7; border-left: 3px solid var(--warn); }
+      .rescard-limit-vague, .rescard-limit-unverifiable { background: var(--paper-dim); border-left: 3px solid var(--slate); }
+      .rescard-limit-headline { font-weight: 600; }
+      .rescard-limit-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 10px 0; }
+      .rescard-limit-label { display: block; font-family: var(--display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--slate); margin-bottom: 2px; }
+      .rescard-limit-source { font-size: 12.5px; }
+      .rescard-limit a { text-decoration: underline; }
+
       .rescard-foot { display: flex; gap: 10px; margin-top: 16px; }
 
       /* ---- email capture (fake door) ---- */
@@ -191,7 +211,7 @@ const goatcounterUrl = import.meta.env.PUBLIC_GOATCOUNTER_URL;
       .guide-cta { margin-top: 48px; padding: 24px; border: 2px solid var(--ink); border-radius: var(--radius); background: #fff; }
 
       @media (max-width: 720px) {
-        .opt-grid, .opt-grid-3, .opt-grid-2, .rescard-cols, .rescard-meters { grid-template-columns: 1fr; }
+        .opt-grid, .opt-grid-3, .opt-grid-2, .rescard-cols, .rescard-meters, .rescard-limit-cols { grid-template-columns: 1fr; }
         .nav { display: none; }
         .wiz-progress li span:last-child { display: none; }
       }
