@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { TASKS, VOLUME_LEVELS, rankCombos } from '../data/combos.js';
+import { trackEvent } from '../lib/analytics.js';
 
 const STEPS = ['task', 'volume', 'results'];
 
@@ -68,6 +69,54 @@ function ResultCard({ combo, rank }) {
   );
 }
 
+function EmailCapture() {
+  const [status, setStatus] = useState('idle'); // idle | sending | done
+  const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT;
+
+  if (!endpoint) return null; // not configured (e.g. local dev) — don't show a dead-end form
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const email = e.target.elements.email.value;
+    trackEvent('email_submitted');
+    setStatus('sending');
+    try {
+      await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ email, source: 'stackverdict-calculator' }),
+      });
+    } catch {
+      // No retry path from a static site — we still show the honest
+      // "we'll follow up" message either way; nothing to fall back to.
+    }
+    setStatus('done');
+  }
+
+  return (
+    <div className="email-capture">
+      {status === 'done' ? (
+        <p className="email-capture-done">Thanks — we'll be in touch once the deep-dive report is ready.</p>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <h3>Want the deep-dive report?</h3>
+          <p>Your optimal model mix per task, and your subscription-vs-API break-even point — as a PDF, once it's ready. This isn't built yet; leave your email and we'll notify you.</p>
+          <div className="email-capture-row">
+            <input type="email" name="email" required placeholder="you@example.com" aria-label="Email address" />
+            <button type="submit" className="btn btn-primary" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending…' : "I'm interested"}
+            </button>
+          </div>
+          <label className="email-capture-consent">
+            <input type="checkbox" required />
+            I agree StackVerdict may email me when the deep-dive report is ready. See the <a href="/privacy">privacy policy</a>.
+          </label>
+        </form>
+      )}
+    </div>
+  );
+}
+
 function labelFor(p) {
   return { free: 'free', byok: 'bring your own key', subscription: 'subscription', usage: 'pay per use' }[p];
 }
@@ -77,6 +126,7 @@ export default function Wizard() {
   const [step, setStep] = useState(0);
   const [task, setTask] = useState(null);
   const [volume, setVolume] = useState(null);
+  const startedRef = useRef(false);
 
   const results = useMemo(() => {
     if (!task || !volume) return [];
@@ -85,6 +135,15 @@ export default function Wizard() {
 
   const canNext = [task, volume][step] != null;
   const current = STEPS[step];
+
+  useEffect(() => {
+    if (current === 'results') trackEvent('calculator_completed');
+  }, [step]);
+
+  const selectTask = (id) => {
+    if (!startedRef.current) { startedRef.current = true; trackEvent('calculator_started'); }
+    setTask(id);
+  };
 
   const reset = () => { setStep(0); setTask(null); setVolume(null); };
 
@@ -104,7 +163,7 @@ export default function Wizard() {
           <div className="opt-grid">
             {TASKS.map((t) => (
               <button key={t.id} className={`opt ${task === t.id ? 'is-sel' : ''}`}
-                onClick={() => setTask(t.id)}>
+                onClick={() => selectTask(t.id)}>
                 <span className="opt-title">{t.label}</span>
                 <span className="opt-blurb">{t.blurb}</span>
               </button>
@@ -135,6 +194,7 @@ export default function Wizard() {
             <button className="btn btn-ghost" onClick={reset}>Start over</button>
           </div>
           {results.map((c, i) => <ResultCard key={c.id} combo={c} rank={i} />)}
+          {results.length > 0 && <EmailCapture />}
         </div>
       )}
 

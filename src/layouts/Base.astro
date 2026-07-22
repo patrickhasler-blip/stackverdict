@@ -1,6 +1,9 @@
 ---
 const { title, description, canonical } = Astro.props;
 const site = 'StackVerdict';
+// Only set in production (Vercel project env vars) — stays unset in local dev
+// and preview builds, so no analytics script loads and nothing fires.
+const plausibleDomain = import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN;
 ---
 <!doctype html>
 <html lang="en">
@@ -21,6 +24,16 @@ const site = 'StackVerdict';
     <meta property="og:site_name" content={site} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://stackverdict.dev/og-image.png" />
+    {plausibleDomain && (
+      <Fragment>
+        {/* Cookie-free, no personal data, no consent banner needed — see /privacy.
+            Self-hosting Plausible? Point this src at your own instance instead. */}
+        <script is:inline>
+          window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments); };
+        </script>
+        <script defer data-domain={plausibleDomain} src="https://plausible.io/js/script.js"></script>
+      </Fragment>
+    )}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -149,6 +162,21 @@ const site = 'StackVerdict';
       .rescard-notes p { margin: 4px 0; }
       .rescard-foot { display: flex; gap: 10px; margin-top: 16px; }
 
+      /* ---- email capture (fake door) ---- */
+      .email-capture { border: 2px dashed var(--line); border-radius: var(--radius); padding: 20px; margin-top: 24px; background: var(--paper); }
+      .email-capture h3 { font-size: 17px; margin: 0 0 6px; }
+      .email-capture > form > p { font-size: 14px; color: var(--slate); margin: 0 0 14px; }
+      .email-capture-row { display: flex; gap: 10px; flex-wrap: wrap; }
+      .email-capture-row input[type="email"] {
+        flex: 1; min-width: 220px; font: inherit; font-size: 15px;
+        border: 2px solid var(--line); border-radius: var(--radius); padding: 10px 12px; background: #fff;
+      }
+      .email-capture-row input[type="email"]:focus { outline: none; border-color: var(--verdict-deep); }
+      .email-capture-consent { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--slate); margin-top: 12px; }
+      .email-capture-consent input { margin-top: 3px; }
+      .email-capture-consent a { text-decoration: underline; }
+      .email-capture-done { font-size: 15px; color: var(--verdict-deep); font-weight: 600; margin: 0; }
+
       /* ---- prose (guides) ---- */
       .prose { max-width: 720px; }
       .prose h1 { font-size: clamp(30px, 5vw, 44px); margin: 0 0 8px; }
@@ -197,7 +225,7 @@ const site = 'StackVerdict';
     <footer class="site-foot">
       <div class="wrap">
         <span>StackVerdict — the right AI coding stack, judged for your build.</span>
-        <span>Prices and tools change fast. Verify before you buy.</span>
+        <span>Prices and tools change fast. Verify before you buy. · <a href="/privacy">Privacy</a></span>
       </div>
     </footer>
   </body>

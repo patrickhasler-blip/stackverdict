@@ -1,0 +1,70 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base
+  title="Privacy Policy"
+  description="How StackVerdict handles analytics and the optional email you can leave for the deep-dive report."
+  canonical="https://stackverdict.dev/privacy"
+>
+  <article class="wrap prose section-top">
+    <nav class="breadcrumb"><a href="/">Home</a> / Privacy Policy</nav>
+
+    <h1>Privacy Policy</h1>
+
+    <div class="callout">
+      <strong>Draft — not legal advice.</strong> This is a placeholder written to describe what
+      the site actually does today. Have it reviewed by a lawyer before treating it as your
+      real privacy policy.
+    </div>
+
+    <h2>Who runs this site</h2>
+    <p>
+      StackVerdict (stackverdict.dev) is operated by [your name / company, address, contact email].
+      This section needs your real legal details before this page is real.
+    </p>
+
+    <h2>Analytics</h2>
+    <p>
+      We use <a href="https://plausible.io" target="_blank" rel="noopener">Plausible Analytics</a>
+      to understand how the site is used — for example, how many people start and finish the
+      cost calculator. Plausible is cookie-free and does not collect or store any personal data
+      or cross-site identifiers. It only reports aggregated numbers (page views and the named
+      events below); no individual visitor is tracked or identifiable. Because no cookies and no
+      personal data are involved, no consent banner is shown or required for this analytics.
+    </p>
+    <p>We track the following named events inside the calculator:</p>
+    <ul>
+      <li><code>calculator_started</code> — you began the calculator.</li>
+      <li><code>calculator_completed</code> — you reached a result.</li>
+      <li><code>email_submitted</code> — you submitted the optional email form below the results.</li>
+    </ul>
+
+    <h2>The email field on the results page</h2>
+    <p>
+      Below your calculator results, you can optionally leave your email address to be notified
+      when a deeper, paid report (your optimal model mix per task, and your break-even threshold)
+      becomes available. This feature does not exist yet — submitting your email only registers
+      your interest.
+    </p>
+    <p>
+      Submitting this form is entirely optional and requires an explicit, unchecked opt-in
+      checkbox. If you submit it, your email address is sent to [form processor — e.g. Formspree]
+      for us to store and later contact you. It is used only to notify you about this report and
+      is not sold, shared with third parties for marketing, or used for any other purpose. We
+      don't store it in your browser (no localStorage) or put it in a URL.
+    </p>
+
+    <h2>Your rights</h2>
+    <p>
+      If you've submitted your email, you can ask us to tell you what we hold, correct it, or
+      delete it at any time by contacting [contact email]. Since analytics has no personal data
+      tied to it, there's nothing individual to access or delete there.
+    </p>
+
+    <h2>Changes</h2>
+    <p>
+      This is an early, draft version of this page. It will be updated as the site and its data
+      practices evolve.
+    </p>
+  </article>
+</Base>
