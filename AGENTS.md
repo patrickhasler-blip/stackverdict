@@ -79,9 +79,12 @@ rather than picking one "winner."
 - Add a guide: create src/pages/guides/<slug>.astro, copy the structure of
   aider-setup.astro, and link it from the relevant combo's `guide` field.
 - Never invent prices or features. If unsure, check the official source.
-- **Known issue to resolve:** `windsurf-sonnet5` in combos.js may need removal —
-  windsurf.com now redirects to devin.ai with no mention of "Windsurf" (checked
-  2026-07-22). See the 'unverifiable' entry in subscription-limits.js.
+- **Resolved 2026-07-22:** Windsurf was rebranded to "Devin Desktop" by Cognition
+  (confirmed on devin.ai/desktop), not discontinued as first assumed from the bare
+  redirect. combos.js's `windsurf-sonnet5` is now `devin-desktop-sonnet5` (tool
+  name, provider, link, and price updated to the current $20/mo Pro tier — was
+  $15). If you see "Windsurf" referenced anywhere else (old links, cached pages),
+  it should point to Devin Desktop instead.
 
 ## Environment variables
 Both are optional at build time (see `.env.example`) — the site builds and runs fine

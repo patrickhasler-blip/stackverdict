@@ -50,10 +50,14 @@ export const SUBSCRIPTION_LIMITS = {
     sourceUrl: 'https://cursor.com/docs/account/pricing',
     overage: { type: 'api', label: 'Automatic pay-as-you-go at raw API rates', priceUsd: null },
   },
-  'windsurf-sonnet5': {
-    confidence: 'unverifiable',
-    basis: 'windsurf.com now redirects to devin.ai, which makes no mention of "Windsurf" as of 2026-07-22 — the product may have been discontinued or absorbed into Devin. We could not confirm current plans or limits, so no threshold is modeled. This combo likely needs to be removed or replaced with current information.',
+  'devin-desktop-sonnet5': {
+    // Windsurf was rebranded, not discontinued — confirmed on a second check
+    // (2026-07-22): devin.ai/desktop states outright "Devin Desktop is the
+    // new name for Windsurf," and existing Windsurf users keep their plans.
+    confidence: 'vague',
+    basis: 'The current $20/mo Pro plan promises "increased quotas" over the free tier but discloses no concrete monthly numbers (tokens, messages, or $ amount). Overage is available — "purchase extra usage which is consumed at API pricing" — so likely no hard block, but the per-unit overage rate also isn\'t published. Not enough to model a threshold on.',
     sourceUrl: 'https://devin.ai/pricing',
+    overage: { type: 'api', label: 'Pay-as-you-go overage at unpublished API rates', priceUsd: null },
   },
   'bolt-managed': {
     confidence: 'estimated',
