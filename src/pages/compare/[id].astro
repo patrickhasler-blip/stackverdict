@@ -15,10 +15,16 @@ const cost = combo.monthlyLow === 0 && combo.monthlyHigh === 0
     : `$${combo.monthlyLow}–${combo.monthlyHigh}/mo`;
 const pricingLabel = { free: 'Free', byok: 'Bring your own API key', subscription: 'Subscription', usage: 'Pay per use' }[combo.pricing];
 const setupLabel = ['', 'one click', 'quick', 'moderate', 'involved', 'advanced'][combo.setup];
+// Written for our actual audience — technical solopreneurs, not "beginner/pro" devs.
+const skillInfo = {
+  'reads-code': { label: 'Reads code', hint: "doesn't need to write it from scratch" },
+  'ai-builder': { label: 'AI-tool builder', hint: 'wants a bit of setup guidance' },
+  'technical': { label: 'Technically comfortable', hint: 'handles raw setup fine' },
+}[combo.minSkill];
 ---
 <Base
   title={`${combo.tool} with ${combo.model} — review, pricing & setup`}
-  description={`Is ${combo.tool} running ${combo.model} right for your build? Pricing (${cost}), skill level, setup effort, and the tasks it's best at.`}
+  description={`Is ${combo.tool} running ${combo.model} right for your build? Pricing (${cost}), who it fits, setup effort, and the tasks it's best at.`}
   canonical={`https://stackverdict.dev/compare/${combo.id}`}
 >
   <article class="wrap prose section-top">
@@ -28,7 +34,7 @@ const setupLabel = ['', 'one click', 'quick', 'moderate', 'involved', 'advanced'
 
     <div class="spec">
       <div><span>Price</span><strong>{cost}</strong><em>{pricingLabel}</em></div>
-      <div><span>Skill floor</span><strong>{combo.minSkill}</strong><em>and up</em></div>
+      <div class="spec-skill"><span>Fits best if you're</span><strong>{skillInfo.label}</strong><em>{skillInfo.hint}</em></div>
       <div><span>Setup</span><strong>{setupLabel}</strong><em>to get running</em></div>
       <div><span>Works in</span><strong>{combo.surface}</strong><em>&nbsp;</em></div>
     </div>
@@ -59,6 +65,7 @@ const setupLabel = ['', 'one click', 'quick', 'moderate', 'involved', 'advanced'
     .spec > div:last-child { border-right: 0; }
     .spec span { font-family: var(--display); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--slate); display: block; }
     .spec strong { font-family: var(--display); font-size: 20px; display: block; margin: 4px 0 2px; text-transform: capitalize; }
+    .spec-skill strong { text-transform: none; }
     .spec em { font-style: normal; font-size: 13px; color: var(--slate); }
     @media (max-width: 720px) { .spec { grid-template-columns: 1fr 1fr; } .spec > div:nth-child(2) { border-right: 0; } }
   </style>

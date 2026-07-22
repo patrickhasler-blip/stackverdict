@@ -5,19 +5,21 @@ import { COMBOS } from '../data/combos.js';
 const toolCount = new Set(COMBOS.map((c) => c.tool)).size;
 ---
 <Base
-  title="Subscription or API? The AI coding cost calculator for freelancers"
-  description="Tell us what you're shipping and how much you actually use AI coding tools. We calculate whether a flat subscription or raw API access is cheaper for you — no guessing, real numbers."
+  title="Subscription or API? The AI coding cost calculator for solo builders"
+  description="Tell us what you're building and how much you actually use AI coding tools. We calculate whether a flat subscription or a raw API key is cheaper for you — no guessing, real numbers."
   canonical="https://stackverdict.dev/"
 >
   <section class="hero">
     <div class="wrap hero-inner">
-      <p class="eyebrow">The cost calculator for freelance builders</p>
+      <p class="eyebrow">The cost calculator for solo builders</p>
       <h1>Subscription or API?<br />We do the math.</h1>
       <p class="hero-lede">
-        {toolCount} tools, dozens of tool-and-model pairings. Tell us what you're shipping
-        &mdash; a Shopify app, a mobile app, a directory &mdash; and how much you actually use
-        AI coding tools. We estimate the real monthly cost of each pairing and tell you straight:
-        subscription or API access, whichever is cheaper for you.
+        You've probably already shipped something with an AI tool — Lovable, Claude Code, one of
+        the others. {toolCount} tools, dozens of tool-and-model pairings later, the question is
+        which one is actually worth paying for. Tell us what you're building — a Shopify app, a
+        mobile app, a directory — and roughly how many hours a day you're at the keyboard with
+        these tools. We'll tell you straight whether a flat subscription or your own API key
+        (the credential that bills you directly for what you use) works out cheaper.
       </p>
       <a class="btn btn-primary btn-lg" href="#find">Find my stack &rarr;</a>
     </div>
@@ -38,7 +40,7 @@ const toolCount = new Set(COMBOS.map((c) => c.tool)).size;
       <li>
         <span class="how-n">02</span>
         <h3>Tell us your usage</h3>
-        <p>A few hours a week or running constantly — usage volume is what actually decides subscription vs. API.</p>
+        <p>Slide to roughly how many hours a day you're actually using these tools. That's what decides subscription vs. API — not a vague monthly guess.</p>
       </li>
       <li>
         <span class="how-n">03</span>

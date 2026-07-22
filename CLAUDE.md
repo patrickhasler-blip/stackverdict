@@ -1,13 +1,14 @@
 # StackVerdict — project guide for Claude Code
 
 StackVerdict (stackverdict.dev) is a subscription-vs-API cost calculator for
-freelancers building real products (Shopify apps, mobile apps, directories, browser
-extensions, AI agents/chatbots, API backends). Users answer two questions (what
-they're building, how many hours/day they actively use AI coding tools) and get a
-ranked verdict of tool + model pairings, each with a real estimated monthly cost
-and, where it applies, a note on whether a subscription or raw API access is
-cheaper for them. The ranking logic in `rankCombos()` sorts cheapest-first — that
-bias is the point, not a bug.
+technical solopreneurs building real products (Shopify apps, mobile apps,
+directories, browser extensions, AI agents/chatbots, API backends). See "Voice &
+audience" below for exactly who that is — it shapes every piece of copy on the
+site, not just the pitch. Users answer two questions (what they're building, how
+many hours/day they actively use AI coding tools) and get a ranked verdict of tool
++ model pairings, each with a real estimated monthly cost and, where it applies, a
+note on whether a subscription or raw API access is cheaper for them. The ranking
+logic in `rankCombos()` sorts cheapest-first — that bias is the point, not a bug.
 
 Subscription combos also get a **rate-limit reality check**: most subscriptions
 cap usage (a rolling session window, a monthly $ or token allowance) and naively
@@ -58,12 +59,50 @@ rather than picking one "winner."
 - `public/` — favicon, OG image, static assets.
 
 ## Brand (do not drift from this)
-- Voice: authoritative, sober, like a testing institute issuing a verdict. Not playful,
-  not hypey. The signature element is the "Our verdict" seal on the top result.
+- Visual voice: authoritative, sober, like a testing institute issuing a verdict.
+  Not playful, not hypey. The signature element is the "Our verdict" seal on the
+  top result. (See "Voice & audience" below for tone-of-copy specifics — this
+  bullet is about the visual/structural identity, not sentence-level wording.)
 - Palette (CSS vars in Base.astro): --ink #0F1B2D, --paper #F4F2EC,
   --verdict #3FB984 (the recommendation green — THE accent, use sparingly),
   --verdict-deep #1E8A5C, --ochre #C99A3B (rare accent), --slate #5B6B85.
 - Type: Space Grotesk (display), Inter (body).
+
+## Voice & audience
+StackVerdict is written for **technical solopreneurs** — people who read code and
+can follow it, who've actually shipped something with an AI tool (Lovable, Claude
+Code, or similar), but don't think of themselves as programmers and get uneasy at
+a bare terminal or an API key field. Not total beginners, not professional
+developers — the people in between. Every rewrite of site copy should be checked
+against this persona, not a generic "make it friendlier" instinct.
+
+- Write like a colleague who's a few steps ahead, not a teacher addressing a
+  student. No hand-holding tone, no explaining things away.
+- Technical terms (API key, token, terminal, BYOK) are fine to use — just place
+  each in a half-sentence of context the first time it shows up on a page (the
+  homepage hero is where the core terms get their first, fullest explanation;
+  after that, use them freely without re-explaining every time).
+- Concrete and direct, no hype. Warmer than engineering documentation, but still
+  sober — this is a verdict, not a pitch.
+- If something genuinely requires terminal comfort or real setup effort, say so
+  plainly. Our value is making technical tools *accessible* to less-technical
+  solopreneurs, not pretending everything is effortless.
+
+### Avoid these phrases
+These read as marketing gloss and undercut the "verdict" voice — a calm, direct
+sentence beats an exclamation point every time:
+- "Let's dive in" / "dive into"
+- "Super easy" / "so easy" / "a breeze" / "a snap"
+- "in just a few clicks" / "in seconds" / "in no time"
+- "Don't worry" / "no sweat"
+- "game-changer" / "supercharge" / "unlock" / "unleash" / "effortless" / "seamless"
+- "Simply..." to open a sentence, when the step isn't actually trivial
+- Hype adjectives and exclamation-heavy copy ("amazing", "incredible", "magic")
+
+If a step takes real effort or terminal comfort, say so calmly instead of smiling
+past it:
+- Good: "This one needs a bit of terminal comfort — the guide walks you through it."
+- Bad: "Setting this up is a breeze — just a few clicks and you're done!"
 
 ## Common maintenance tasks
 - Add a tool: append an object to COMBOS in src/data/combos.js. Fill every field.
@@ -79,6 +118,11 @@ rather than picking one "winner."
 - Add a guide: create src/pages/guides/<slug>.astro, copy the structure of
   aider-setup.astro, and link it from the relevant combo's `guide` field.
 - Never invent prices or features. If unsure, check the official source.
+- `minSkill` on each combo is `'reads-code' | 'ai-builder' | 'technical'` (see the
+  field comment in combos.js) — written for our actual audience, not generic
+  "beginner/intermediate/pro" labels. Display labels/hints live in a small lookup
+  in `src/pages/compare/[id].astro` (`skillInfo`) since that's the only page that
+  shows it. Keep new tools' `minSkill` consistent with this taxonomy.
 - **Resolved 2026-07-22:** Windsurf was rebranded to "Devin Desktop" by Cognition
   (confirmed on devin.ai/desktop), not discontinued as first assumed from the bare
   redirect. combos.js's `windsurf-sonnet5` is now `devin-desktop-sonnet5` (tool

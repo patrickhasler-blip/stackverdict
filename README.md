@@ -1,10 +1,13 @@
-# StackVerdict — subscription-vs-API cost calculator for freelancers
+# StackVerdict — subscription-vs-API cost calculator for solo builders
 
-A cost calculator for freelancers building real products (Shopify apps, mobile apps,
-directories, browser extensions, AI agents). Users pick what they're building and how
-much they actually use AI coding tools, and get a ranked shortlist of tool + model
-pairings — each with a real estimated monthly cost, and a note on whether a flat
-subscription or raw API access works out cheaper for their usage — plus SEO setup guides.
+A cost calculator for technical solopreneurs building real products (Shopify apps,
+mobile apps, directories, browser extensions, AI agents) — people who've already
+shipped something with an AI tool but don't think of themselves as programmers. Users
+pick what they're building and how much they actually use AI coding tools, and get a
+ranked shortlist of tool + model pairings — each with a real estimated monthly cost,
+and a note on whether a flat subscription or raw API access works out cheaper for
+their usage — plus SEO setup guides. See CLAUDE.md's "Voice & audience" section
+before writing copy for this site.
 
 ## Run it
 ```bash
